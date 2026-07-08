@@ -33,7 +33,7 @@ Jira-Roadmap/
 │           └── index.js             # Timeline rendering, positioning, and actions
 ├── build.bat                        # Compiles Java code & builds standalone JAR
 ├── run.bat                          # Executes the JAR using the Java 8 JRE
-└── config.properties                # Bootstrapped local configuration file
+# config.properties is stored in the global ~/.jiraroadmap/ folder in user settings.
 ```
 
 ---
@@ -52,7 +52,7 @@ This script will:
 - Bundle all classes and resources into a standalone executable: `JiraRoadmap.jar`.
 
 ### 2. Configure Settings
-Upon first start, a configuration window will appear. Alternatively, you can edit the generated `config.properties` file in the same directory:
+Upon first start, a configuration window will appear. Alternatively, you can edit the generated `config.properties` file located in the user home settings directory (`~/.jiraroadmap/config.properties`):
 ```properties
 # Base URL of your enterprise Jira instance
 jira.url=https://jira.yourcompany.com
