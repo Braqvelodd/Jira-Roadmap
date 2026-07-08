@@ -34,7 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-theme').addEventListener('click', toggleTheme);
     document.getElementById('btn-sort-red').addEventListener('click', togglePrioritizeRed);
     
-    // Bind enter key on JQL input
+    // Bind enter key on JQL and URL settings inputs
+    document.getElementById('url-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            reloadData();
+        }
+    });
     document.getElementById('jql-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             reloadData();
@@ -107,9 +112,9 @@ function bootstrapApp() {
             const settingsJson = window.backend.getSettings();
             state.settings = JSON.parse(settingsJson);
             
-            // Set JQL input value
+            // Set URL and JQL input values
+            document.getElementById('url-input').value = state.settings.jiraUrl || '';
             document.getElementById('jql-input').value = state.settings.jql || '';
-            document.getElementById('jql-input').title = `Jira: ${state.settings.jiraUrl}`;
 
             // Load data
             reloadData();
@@ -127,6 +132,7 @@ function bootstrapApp() {
             startDateField: "customfield_10015",
             endDateField: "duedate"
         };
+        document.getElementById('url-input').value = state.settings.jiraUrl;
         document.getElementById('jql-input').value = state.settings.jql;
         state.roadmapData = getMockRoadmapData();
         renderTimeline();
@@ -135,14 +141,17 @@ function bootstrapApp() {
 }
 
 function reloadData() {
+    const newUrl = document.getElementById('url-input').value.trim();
     const newJql = document.getElementById('jql-input').value.trim();
+    
     showLoader('Fetching roadmap data...');
     if (typeof window.backend !== 'undefined') {
         // Run in background to prevent UI freeze
         setTimeout(() => {
             try {
-                // Update the JQL configuration on the backend
-                window.backend.updateJql(newJql);
+                // Update the settings configuration on the backend
+                window.backend.updateSettings(newUrl, newJql);
+                state.settings.jiraUrl = newUrl;
                 state.settings.jql = newJql;
 
                 const dataJson = window.backend.getRoadmapData();
@@ -162,6 +171,8 @@ function reloadData() {
             }
         }, 100);
     } else {
+        state.settings.jiraUrl = newUrl;
+        state.settings.jql = newJql;
         setTimeout(() => {
             renderTimeline();
             hideLoader();

@@ -23,15 +23,6 @@ public class JiraRoadmapApp extends Application {
             // 1. Initialize configuration manager
             configManager = new ConfigManager();
 
-            // 2. Bootstrap configuration if it's the placeholder default
-            if (configManager.isPlaceholder()) {
-                if (!showConfigSetupDialog()) {
-                    System.out.println("Configuration setup cancelled. Exiting.");
-                    Platform.exit();
-                    return;
-                }
-            }
-
             // 3. Initialize Jira Client
             String jiraUrl = configManager.getProperty("jira.url", "");
             jiraClient = new JiraClient(jiraUrl);
@@ -101,39 +92,7 @@ public class JiraRoadmapApp extends Application {
         }
     }
 
-    private boolean showConfigSetupDialog() {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Jira Connection Configuration");
-        dialog.setHeaderText("Please configure your Jira integration settings.");
 
-        ButtonType saveButtonType = new ButtonType("Save Config", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField urlField = new TextField(configManager.getProperty("jira.url", "https://jira.yourcompany.com"));
-        urlField.setPrefWidth(400);
-        TextField jqlField = new TextField(configManager.getProperty("jira.jql", ""));
-        jqlField.setPrefWidth(400);
-
-        grid.add(new Label("Jira Base URL:"), 0, 0);
-        grid.add(urlField, 1, 0);
-        grid.add(new Label("JQL Query:"), 0, 1);
-        grid.add(jqlField, 1, 1);
-
-        dialog.getDialogPane().setContent(grid);
-
-        Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent() && result.get() == saveButtonType) {
-            configManager.setProperty("jira.url", urlField.getText().trim());
-            configManager.setProperty("jira.jql", jqlField.getText().trim());
-            configManager.saveProperties();
-            return true;
-        }
-        return false;
-    }
 
     private void showCertificateSelectionDialog(List<String> aliases) {
         ChoiceDialog<String> dialog = new ChoiceDialog<>(aliases.get(0), aliases);

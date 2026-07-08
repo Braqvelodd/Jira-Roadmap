@@ -194,31 +194,45 @@ body {
     letter-spacing: -0.3px;
     color: var(--text-primary);
 }
-.jql-input-container {
+.settings-input-container {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     background-color: var(--bg-row-hover);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 0 8px;
+    padding: 0 10px;
     height: 32px;
-    width: 340px;
     transition: all var(--transition-fast);
 }
 
-.jql-input-container:focus-within {
+.settings-input-container:focus-within {
     border-color: var(--primary-blue);
     background-color: var(--bg-header);
     box-shadow: 0 0 0 2px rgba(12, 102, 228, 0.15);
 }
 
-.icon-search {
+.settings-input-container.url-container {
+    width: 240px;
+}
+
+.settings-input-container.jql-container {
+    width: 380px;
+}
+
+.input-label {
+    font-size: 9px;
+    font-weight: 700;
     color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid var(--border-color);
+    padding-right: 8px;
+    user-select: none;
     flex-shrink: 0;
 }
 
-#jql-input {
+.settings-input-container input {
     border: none;
     background: transparent;
     color: var(--text-primary);
@@ -228,7 +242,7 @@ body {
     outline: none;
 }
 
-#jql-input::placeholder {
+.settings-input-container input::placeholder {
     color: var(--text-muted);
 }
 

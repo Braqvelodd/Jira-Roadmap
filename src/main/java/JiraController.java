@@ -65,13 +65,15 @@ public class JiraController {
     }
 
     /**
-     * Called by JavaScript frontend to save a modified JQL query
+     * Called by JavaScript frontend to save modified Jira URL and JQL query settings
      */
-    public void updateJql(String newJql) {
-        if (newJql != null) {
+    public void updateSettings(String newUrl, String newJql) {
+        if (newUrl != null && newJql != null) {
+            configManager.setProperty("jira.url", newUrl.trim());
             configManager.setProperty("jira.jql", newJql.trim());
             configManager.saveProperties();
-            System.out.println("JQL query updated and saved to config.properties: " + newJql);
+            jiraClient.setJiraUrl(newUrl.trim());
+            System.out.println("Settings updated in config.properties: URL=" + newUrl + ", JQL=" + newJql);
         }
     }
 }

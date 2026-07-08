@@ -11,13 +11,19 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 
 public class JiraClient {
-    private final String jiraUrl;
+    private String jiraUrl;
     private String selectedAlias = null;
     private SSLSocketFactory sslSocketFactory = null;
 
     public JiraClient(String jiraUrl) {
-        this.jiraUrl = jiraUrl.endsWith("/") ? jiraUrl.substring(0, jiraUrl.length() - 1) : jiraUrl;
+        setJiraUrl(jiraUrl);
         setupDefaultSSL();
+    }
+
+    public synchronized void setJiraUrl(String newJiraUrl) {
+        if (newJiraUrl != null) {
+            this.jiraUrl = newJiraUrl.endsWith("/") ? newJiraUrl.substring(0, newJiraUrl.length() - 1) : newJiraUrl;
+        }
     }
 
     // Get list of client certificate aliases from Windows-MY keystore
