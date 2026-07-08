@@ -63,4 +63,15 @@ public class JiraController {
     public void log(String message) {
         System.out.println("[JS Console] " + message);
     }
+
+    /**
+     * Called by JavaScript frontend to save a modified JQL query
+     */
+    public void updateJql(String newJql) {
+        if (newJql != null) {
+            configManager.setProperty("jira.jql", newJql.trim());
+            configManager.saveProperties();
+            System.out.println("JQL query updated and saved to config.properties: " + newJql);
+        }
+    }
 }

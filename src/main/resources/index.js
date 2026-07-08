@@ -34,6 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-theme').addEventListener('click', toggleTheme);
     document.getElementById('btn-sort-red').addEventListener('click', togglePrioritizeRed);
     
+    // Bind enter key on JQL input
+    document.getElementById('jql-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            reloadData();
+        }
+    });
+    
     // Zoom control listeners
     document.querySelectorAll('#zoom-controls .btn-zoom').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -100,9 +107,9 @@ function bootstrapApp() {
             const settingsJson = window.backend.getSettings();
             state.settings = JSON.parse(settingsJson);
             
-            // Render JQL badge
-            document.getElementById('jql-indicator').innerText = state.settings.jql || 'Custom JQL';
-            document.getElementById('jql-indicator').title = `URL: ${state.settings.jiraUrl}\nJQL: ${state.settings.jql}`;
+            // Set JQL input value
+            document.getElementById('jql-input').value = state.settings.jql || '';
+            document.getElementById('jql-input').title = `Jira: ${state.settings.jiraUrl}`;
 
             // Load data
             reloadData();
@@ -120,7 +127,7 @@ function bootstrapApp() {
             startDateField: "customfield_10015",
             endDateField: "duedate"
         };
-        document.getElementById('jql-indicator').innerText = state.settings.jql;
+        document.getElementById('jql-input').value = state.settings.jql;
         state.roadmapData = getMockRoadmapData();
         renderTimeline();
         hideLoader();
@@ -128,11 +135,16 @@ function bootstrapApp() {
 }
 
 function reloadData() {
+    const newJql = document.getElementById('jql-input').value.trim();
     showLoader('Fetching roadmap data...');
     if (typeof window.backend !== 'undefined') {
         // Run in background to prevent UI freeze
         setTimeout(() => {
             try {
+                // Update the JQL configuration on the backend
+                window.backend.updateJql(newJql);
+                state.settings.jql = newJql;
+
                 const dataJson = window.backend.getRoadmapData();
                 const parsed = JSON.parse(dataJson);
                 

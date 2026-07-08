@@ -194,19 +194,42 @@ body {
     letter-spacing: -0.3px;
     color: var(--text-primary);
 }
-
-.badge-jql {
-    background-color: var(--primary-blue-bg);
-    color: var(--primary-blue);
-    padding: 4px 10px;
+.jql-input-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--bg-row-hover);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    max-width: 300px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    border: 1px solid rgba(12, 102, 228, 0.2);
+    padding: 0 8px;
+    height: 32px;
+    width: 340px;
+    transition: all var(--transition-fast);
+}
+
+.jql-input-container:focus-within {
+    border-color: var(--primary-blue);
+    background-color: var(--bg-header);
+    box-shadow: 0 0 0 2px rgba(12, 102, 228, 0.15);
+}
+
+.icon-search {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+#jql-input {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    width: 100%;
+    outline: none;
+}
+
+#jql-input::placeholder {
+    color: var(--text-muted);
 }
 
 /* Buttons */
