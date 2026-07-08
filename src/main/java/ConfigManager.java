@@ -2,17 +2,22 @@ import java.io.*;
 import java.util.Properties;
 
 public class ConfigManager {
-    private static final String CONFIG_FILE = "config.properties";
+    private File configFile;
     private Properties properties = new Properties();
 
     public ConfigManager() {
+        String userHome = System.getProperty("user.home");
+        File configDir = new File(userHome, ".jiraroadmap");
+        if (!configDir.exists()) {
+            configDir.mkdirs();
+        }
+        configFile = new File(configDir, "config.properties");
         loadProperties();
     }
 
     private void loadProperties() {
-        File file = new File(CONFIG_FILE);
-        if (file.exists()) {
-            try (InputStream input = new FileInputStream(file)) {
+        if (configFile.exists()) {
+            try (InputStream input = new FileInputStream(configFile)) {
                 properties.load(input);
             } catch (IOException e) {
                 System.err.println("Error loading config.properties: " + e.getMessage());
@@ -29,11 +34,11 @@ public class ConfigManager {
         properties.setProperty("jira.startDateField", "customfield_10015");
         properties.setProperty("jira.endDateField", "duedate");
         saveProperties();
-        System.out.println("Bootstrapped default config.properties. Please update it with your Jira details.");
+        System.out.println("Bootstrapped default config.properties in " + configFile.getAbsolutePath());
     }
 
     public void saveProperties() {
-        try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
+        try (OutputStream output = new FileOutputStream(configFile)) {
             properties.store(output, "Jira Interactive Roadmap Dashboard Configuration");
         } catch (IOException e) {
             System.err.println("Error saving config.properties: " + e.getMessage());
