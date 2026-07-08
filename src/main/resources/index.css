@@ -1,0 +1,824 @@
+/* ==========================================================================
+   Variables & Theme Definitions
+   ========================================================================== */
+:root {
+    /* Fonts */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-heading: 'Outfit', 'Inter', sans-serif;
+
+    /* Transition speeds */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Theme (Classic Jira representation) */
+.light-theme {
+    --bg-header: #ffffff;
+    --bg-app: #f4f5f7;
+    --bg-panel-left: #ffffff;
+    --bg-panel-right: #ffffff;
+    --bg-row-hover: #f4f5f7;
+    --bg-header-row: #fafbfc;
+    
+    --border-color: #dfe1e6;
+    --border-grid: #f0f2f5;
+    
+    --text-primary: #172b4d;
+    --text-secondary: #5e6c84;
+    --text-muted: #8993a4;
+    
+    --primary-blue: #0c66e4;
+    --primary-blue-hover: #0052cc;
+    --primary-blue-bg: #deebff;
+    
+    /* Health Status Colors */
+    --status-green-bg: #e3fcef;
+    --status-green-text: #006644;
+    --status-green-hover: #d3f9e5;
+    
+    --status-yellow-bg: #fff0b3;
+    --status-yellow-text: #825700;
+    --status-yellow-hover: #ffe380;
+    
+    --status-red-bg: #ffebe6;
+    --status-red-text: #bf2600;
+    --status-red-hover: #ffd2cc;
+    
+    --status-none-bg: #f4f5f7;
+    --status-none-text: #5e6c84;
+    --status-none-hover: #ebecf0;
+
+    /* Shadow */
+    --shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.08);
+    --shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+    --shadow-lg: 0 12px 24px -6px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+    
+    /* Gantt Epic Bar Colors */
+    --epic-bar-1: #0052cc;
+    --epic-bar-2: #5243aa;
+    --epic-bar-3: #00875a;
+    --epic-bar-4: #de350b;
+    --epic-bar-5: #ff9900;
+    --epic-bar-child: #a5adba;
+}
+
+/* Dark Theme (Premium dark mode representation) */
+.dark-theme {
+    --bg-header: #0b0e11;
+    --bg-app: #0d1117;
+    --bg-panel-left: #151b22;
+    --bg-panel-right: #151b22;
+    --bg-row-hover: #21262d;
+    --bg-header-row: #161b22;
+    
+    --border-color: #30363d;
+    --border-grid: #21262d;
+    
+    --text-primary: #c9d1d9;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    
+    --primary-blue: #1f6feb;
+    --primary-blue-hover: #388bfd;
+    --primary-blue-bg: #0d2a58;
+    
+    /* Health Status Colors (Neon glassmorphic representation) */
+    --status-green-bg: rgba(46, 160, 67, 0.15);
+    --status-green-text: #56d364;
+    --status-green-hover: rgba(46, 160, 67, 0.25);
+    
+    --status-yellow-bg: rgba(210, 153, 34, 0.15);
+    --status-yellow-text: #e3b341;
+    --status-yellow-hover: rgba(210, 153, 34, 0.25);
+    
+    --status-red-bg: rgba(248, 81, 73, 0.15);
+    --status-red-text: #ff7b72;
+    --status-red-hover: rgba(248, 81, 73, 0.25);
+    
+    --status-none-bg: rgba(110, 118, 129, 0.1);
+    --status-none-text: #8b949e;
+    --status-none-hover: rgba(110, 118, 129, 0.2);
+
+    /* Shadow */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.7);
+    
+    /* Gantt Epic Bar Colors */
+    --epic-bar-1: #1f6feb;
+    --epic-bar-2: #8957e5;
+    --epic-bar-3: #2ea043;
+    --epic-bar-4: #f85149;
+    --epic-bar-5: #d29922;
+    --epic-bar-child: #484f58;
+}
+
+/* ==========================================================================
+   Base Elements & Reset
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ==========================================================================
+   Header Styles
+   ========================================================================== */
+.app-header {
+    height: 56px;
+    background-color: var(--bg-header);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.jira-logo {
+    color: var(--primary-blue);
+    animation: bounceLogo 1s ease;
+}
+
+@keyframes bounceLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.logo-container h1 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+}
+
+.badge-jql {
+    background-color: var(--primary-blue-bg);
+    color: var(--primary-blue);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid rgba(12, 102, 228, 0.2);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-header);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.btn:hover {
+    background-color: var(--bg-row-hover);
+    border-color: var(--text-muted);
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    color: #ffffff;
+    border-color: var(--primary-blue);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-blue-hover);
+    border-color: var(--primary-blue-hover);
+}
+
+.btn-group {
+    display: inline-flex;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.btn-group .btn {
+    border: none;
+    border-radius: 0;
+    border-right: 1px solid var(--border-color);
+}
+
+.btn-group .btn:last-child {
+    border-right: none;
+}
+
+.btn-group .btn.active {
+    background-color: var(--primary-blue-bg);
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.btn-icon {
+    width: 32px;
+    padding: 0;
+}
+
+.btn-toggle.active {
+    background-color: var(--status-red-bg);
+    color: var(--status-red-text);
+    border-color: var(--status-red-text);
+}
+
+/* Animations */
+.icon-refresh.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Roadmap Grid Container Layout
+   ========================================================================== */
+.roadmap-container {
+    flex-grow: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Issues left panel */
+.issues-panel {
+    width: 420px;
+    flex-shrink: 0;
+    background-color: var(--bg-panel-left);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 5;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.02);
+}
+
+.issues-panel .panel-header {
+    height: 48px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-header-row);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.issues-panel .panel-rows {
+    flex-grow: 1;
+    overflow-y: hidden; /* Scrolled programmatically in sync with right pane */
+}
+
+/* Right timeline panel */
+.timeline-panel {
+    flex-grow: 1;
+    background-color: var(--bg-panel-right);
+    display: flex;
+    flex-direction: column;
+    overflow: auto; /* Handles horizontal scrolling */
+}
+
+.timeline-header-scroll {
+    height: 48px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-header-row);
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.timeline-grid-body {
+    flex-grow: 1;
+    position: relative;
+}
+
+/* ==========================================================================
+   Timeline Scales & Headers
+   ========================================================================== */
+.timeline-scale-row {
+    display: flex;
+    height: 24px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-grid);
+}
+
+.timeline-scale-row:last-child {
+    border-bottom: none;
+    font-size: 9px;
+    color: var(--text-muted);
+}
+
+.scale-cell {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border-grid);
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Timeline Background Grid Columns */
+.timeline-bg-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.grid-col {
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-grid);
+    height: 100%;
+}
+
+.timeline-bars-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+
+/* ==========================================================================
+   Synced Row Styles
+   ========================================================================== */
+.row-item {
+    height: 40px;
+    border-bottom: 1px solid var(--border-grid);
+    display: flex;
+    align-items: center;
+    transition: background-color var(--transition-fast);
+}
+
+.row-item:hover {
+    background-color: var(--bg-row-hover);
+}
+
+/* Left panel row content */
+.issue-row {
+    padding: 0 16px;
+    justify-content: space-between;
+}
+
+.issue-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.expander-btn {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 4px;
+    transition: transform var(--transition-normal), background-color var(--transition-fast);
+}
+
+.expander-btn:hover {
+    background-color: var(--border-color);
+}
+
+.expander-btn.collapsed {
+    transform: rotate(-90deg);
+}
+
+.issue-type-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.issue-type-icon.epic {
+    background-color: #904ee2;
+}
+
+.issue-type-icon.story {
+    background-color: #4bade8;
+}
+
+.issue-type-icon.task {
+    background-color: #4bade8;
+}
+
+.issue-type-icon.bug {
+    background-color: #e54937;
+}
+
+.issue-key {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.issue-key:hover {
+    color: var(--primary-blue);
+    text-decoration: underline;
+}
+
+.issue-summary {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.issue-indent {
+    width: 24px;
+    height: 100%;
+    border-right: 2px dashed var(--border-color);
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* Status Badge / Dropdown */
+.health-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    white-space: nowrap;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.health-badge:hover {
+    transform: translateY(-1px);
+}
+
+.health-badge.green {
+    background-color: var(--status-green-bg);
+    color: var(--status-green-text);
+}
+.health-badge.green:hover { background-color: var(--status-green-hover); }
+
+.health-badge.yellow {
+    background-color: var(--status-yellow-bg);
+    color: var(--status-yellow-text);
+}
+.health-badge.yellow:hover { background-color: var(--status-yellow-hover); }
+
+.health-badge.red {
+    background-color: var(--status-red-bg);
+    color: var(--status-red-text);
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.2);
+}
+.health-badge.red:hover { background-color: var(--status-red-hover); }
+
+.health-badge.none {
+    background-color: var(--status-none-bg);
+    color: var(--status-none-text);
+}
+.health-badge.none:hover { background-color: var(--status-none-hover); }
+
+.badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+/* ==========================================================================
+   Timeline Bars (Gantt representation)
+   ========================================================================== */
+.timeline-row {
+    position: relative;
+    width: 100%;
+}
+
+.gantt-bar {
+    position: absolute;
+    height: 24px;
+    top: 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    cursor: pointer;
+    transition: opacity var(--transition-fast), filter var(--transition-fast), transform var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    z-index: 3;
+}
+
+.gantt-bar:hover {
+    filter: brightness(1.08);
+    transform: scaleY(1.04);
+    box-shadow: var(--shadow-md);
+}
+
+.gantt-bar.epic-bar {
+    /* Color loaded dynamically or via CSS custom variable classes */
+    color: #ffffff;
+}
+
+.gantt-bar.child-bar {
+    background-color: var(--epic-bar-child);
+    color: #ffffff;
+    height: 18px;
+    top: 11px;
+    border-radius: 4px;
+    opacity: 0.85;
+}
+
+.gantt-bar-label {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* Date endpoint markers inside bars */
+.gantt-bar::before, .gantt-bar::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.gantt-bar:hover::before, .gantt-bar:hover::after {
+    opacity: 1;
+}
+
+.gantt-bar::before { left: 4px; }
+.gantt-bar::after { right: 4px; }
+
+/* Out-of-bounds dates / infinite markers */
+.gantt-bar.no-dates {
+    background: repeating-linear-gradient(
+        45deg,
+        var(--border-color),
+        var(--border-color) 10px,
+        var(--bg-row-hover) 10px,
+        var(--bg-row-hover) 20px
+    );
+    color: var(--text-secondary);
+    border: 1px dashed var(--text-muted);
+}
+
+/* ==========================================================================
+   Context Selector Menu Popover
+   ========================================================================== */
+.status-popover {
+    position: absolute;
+    background-color: var(--bg-header);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    width: 180px;
+    padding: 6px 0;
+    animation: popoverFadeIn var(--transition-fast);
+}
+
+@keyframes popoverFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.popover-item {
+    width: 100%;
+    border: none;
+    background: none;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--transition-fast);
+}
+
+.popover-item:hover {
+    background-color: var(--bg-row-hover);
+}
+
+.popover-divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 4px 0;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.status-dot.green { background-color: #2ea043; }
+.status-dot.yellow { background-color: #d29922; }
+.status-dot.red { background-color: #f85149; }
+
+.popover-item.status-clear {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* ==========================================================================
+   Toast Notification Engine
+   ========================================================================== */
+.toast-container {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    background-color: var(--bg-header);
+    color: var(--text-primary);
+    border-left: 4px solid var(--primary-blue);
+    padding: 12px 18px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-lg);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 280px;
+    max-width: 400px;
+    animation: toastSlideIn var(--transition-normal);
+    border-top: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+@keyframes toastSlideIn {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.toast.success { border-left-color: #2ea043; }
+.toast.error { border-left-color: #f85149; }
+.toast.warning { border-left-color: #d29922; }
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 12px;
+}
+
+.toast-close:hover {
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Loading Overlay and Backdrop Spinner
+   ========================================================================== */
+.loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(9, 30, 66, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    transition: opacity var(--transition-normal);
+}
+
+.light-theme .loader-overlay {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.dark-theme .loader-overlay {
+    background-color: rgba(13, 17, 23, 0.7);
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loader-text {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   Expand/Collapse Styles
+   ========================================================================== */
+.child-collapsed-row {
+    display: none !important;
+}

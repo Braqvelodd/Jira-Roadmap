@@ -1,0 +1,54 @@
+import java.io.*;
+import java.util.Properties;
+
+public class ConfigManager {
+    private static final String CONFIG_FILE = "config.properties";
+    private Properties properties = new Properties();
+
+    public ConfigManager() {
+        loadProperties();
+    }
+
+    private void loadProperties() {
+        File file = new File(CONFIG_FILE);
+        if (file.exists()) {
+            try (InputStream input = new FileInputStream(file)) {
+                properties.load(input);
+            } catch (IOException e) {
+                System.err.println("Error loading config.properties: " + e.getMessage());
+            }
+        } else {
+            bootstrapDefaultConfig();
+        }
+    }
+
+    private void bootstrapDefaultConfig() {
+        properties.setProperty("jira.url", "https://jira.yourcompany.com");
+        properties.setProperty("jira.jql", "project = PROJ AND issuetype in (Epic, Story, Task) ORDER BY created DESC");
+        properties.setProperty("jira.epicLinkField", "customfield_10014");
+        properties.setProperty("jira.startDateField", "customfield_10015");
+        properties.setProperty("jira.endDateField", "duedate");
+        saveProperties();
+        System.out.println("Bootstrapped default config.properties. Please update it with your Jira details.");
+    }
+
+    public void saveProperties() {
+        try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
+            properties.store(output, "Jira Interactive Roadmap Dashboard Configuration");
+        } catch (IOException e) {
+            System.err.println("Error saving config.properties: " + e.getMessage());
+        }
+    }
+
+    public String getProperty(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
+
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+
+    public boolean isPlaceholder() {
+        return "https://jira.yourcompany.com".equals(getProperty("jira.url", ""));
+    }
+}

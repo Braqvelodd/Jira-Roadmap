@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="light-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Interactive Roadmap Dashboard</title>
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Top Dashboard Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-container">
+                <svg class="jira-logo" viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor" d="M11.53 2c-.39 0-.76.19-.98.51L6.7 8.3c-.22.32-.22.74 0 1.06l3.85 5.79c.22.32.59.51.98.51h7.82c.59 0 .97-.64.67-1.15l-3.85-5.79c-.22-.32-.22-.74 0-1.06l3.85-5.79c.3-.51-.08-1.15-.67-1.15h-7.82zm-4.7 6.3c-.39 0-.76.19-.98.51L2.01 14.6c-.22.32-.22.74 0 1.06l3.85 5.79c.22.32.59.51.98.51h7.82c.59 0 .97-.64.67-1.15l-3.85-5.79c-.22-.32-.22-.74 0-1.06l3.85-5.79c.3-.51-.08-1.15-.67-1.15H6.83z"/>
+                </svg>
+                <h1>Jira Interactive Roadmap</h1>
+            </div>
+            <span class="badge-jql" id="jql-indicator">Loading JQL...</span>
+        </div>
+
+        <div class="header-right">
+            <!-- Zoom Controls -->
+            <div class="btn-group" id="zoom-controls">
+                <button class="btn btn-zoom" data-zoom="weeks">Weeks</button>
+                <button class="btn btn-zoom active" data-zoom="months">Months</button>
+                <button class="btn btn-zoom" data-zoom="quarters">Quarters</button>
+            </div>
+
+            <!-- Priority Toggle -->
+            <button class="btn btn-toggle" id="btn-sort-red">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 4h18M3 10h18M3 16h10M17 14l4 4-4 4M21 18H13"/>
+                </svg>
+                <span>Prioritize Blockers</span>
+            </button>
+
+            <!-- Refresh Button -->
+            <button class="btn btn-primary" id="btn-refresh">
+                <svg class="icon-refresh" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                <span>Refresh</span>
+            </button>
+
+            <!-- Theme Toggle -->
+            <button class="btn btn-icon" id="btn-theme" title="Toggle Light/Dark Mode">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="roadmap-container">
+        <!-- Left Side: Issue Details List (Locked/Fixed Width) -->
+        <section class="issues-panel" id="issues-panel">
+            <div class="panel-header">
+                <span>Epic / Issue</span>
+                <span>Health</span>
+            </div>
+            <div class="panel-rows" id="issues-list-container">
+                <!-- Dynamic Content Loaded Here -->
+            </div>
+        </section>
+
+        <!-- Right Side: Timeline Visualization (Scrollable Grid) -->
+        <section class="timeline-panel" id="timeline-panel">
+            <div class="timeline-header-scroll" id="timeline-header-container">
+                <!-- Timeline scale dates (Weeks/Months/Quarters) will render here -->
+            </div>
+            <div class="timeline-grid-body" id="timeline-grid-container">
+                <!-- Gantt grid and bars will render here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification Banner -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Status Selector Popover Context Menu -->
+    <div class="status-popover" id="status-popover" style="display: none;">
+        <button class="popover-item status-green" data-status="green">
+            <span class="status-dot green"></span> No problems
+        </button>
+        <button class="popover-item status-yellow" data-status="yellow">
+            <span class="status-dot yellow"></span> Minor problems
+        </button>
+        <button class="popover-item status-red" data-status="red">
+            <span class="status-dot red"></span> Severe limitations
+        </button>
+        <hr class="popover-divider">
+        <button class="popover-item status-clear" data-status="none">
+            Clear status label
+        </button>
+    </div>
+
+    <!-- Loader Backdrop -->
+    <div class="loader-overlay" id="loader-overlay">
+        <div class="loader"></div>
+        <div class="loader-text" id="loader-text">Loading Roadmap...</div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>

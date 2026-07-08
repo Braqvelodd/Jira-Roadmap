@@ -1,0 +1,21 @@
+# Compiled class files and output
+target/
+*.class
+
+# Standalone package outputs
+*.jar
+*.war
+*.zip
+
+# Local user configurations
+config.properties
+
+# IDE settings
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+.DS_Store
+Thumbs.db
