@@ -1143,27 +1143,7 @@ body {
     padding: 0 10px;
 }
 
-/* Inline Fields Add Button */
-#btn-fields-inline {
-    background-color: var(--primary-blue);
-    color: #ffffff;
-    border: none;
-    border-radius: 3px;
-    padding: 2px 6px;
-    font-size: 9px;
-    font-weight: 600;
-    cursor: pointer;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    text-transform: none; /* keep original capitalization */
-    transition: background-color var(--transition-fast);
-}
 
-#btn-fields-inline:hover {
-    background-color: var(--primary-blue-hover);
-}
 
 body.resizing-active {
     cursor: col-resize !important;
