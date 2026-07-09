@@ -589,12 +589,7 @@ function renderHeadersRow() {
     gFields.className = 'header-cell group-fields';
     gFields.innerHTML = `
         <span>Fields</span>
-        <button id="btn-fields-inline" class="dots-btn" title="Toggle Visible Columns/Fields">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <circle cx="12" cy="7" r="2.5"/>
-                <circle cx="12" cy="17" r="2.5"/>
-            </svg>
-        </button>
+        <span id="btn-fields-inline" class="dots-text" title="Toggle Visible Columns/Fields">..</span>
     `;
     groupRow.appendChild(gFields);
     headerContainer.appendChild(groupRow);
