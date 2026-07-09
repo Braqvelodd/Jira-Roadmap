@@ -90,6 +90,20 @@ function updateHeaderGroupWidths() {
     }
 }
 
+function syncPanelWidth() {
+    const panel = document.getElementById('issues-panel');
+    if (!panel) return;
+    
+    let totalWidth = (state.columnWidths.epicIssue || 250) + (state.columnWidths.healthStatus || 110);
+    state.visibleColumns.forEach(col => {
+        totalWidth += state.columnWidths[col] || 100;
+    });
+    
+    panel.style.width = totalWidth + 'px';
+    panel.style.minWidth = totalWidth + 'px';
+    panel.style.maxWidth = totalWidth + 'px';
+}
+
 function initColumnResizing() {
     let startX = 0;
     let startWidth = 0;
@@ -130,6 +144,7 @@ function initColumnResizing() {
         });
         
         updateHeaderGroupWidths();
+        syncPanelWidth(); // Keep panel size synchronized
     }
 
     function handleMouseUp() {
@@ -144,26 +159,42 @@ function initColumnResizing() {
         affectedCells = [];
     }
 
-    // 2. Issues Panel Resizer
+    // 2. Issues Panel Resizer (resizes the last visible column in real-time)
     const panelResizer = document.getElementById('issues-panel-resizer');
     const panel = document.getElementById('issues-panel');
     if (panelResizer && panel) {
         let pStartX = 0;
-        let pStartWidth = 0;
+        let pStartColWidth = 0;
 
         panelResizer.addEventListener('mousedown', (e) => {
             pStartX = e.clientX;
-            pStartWidth = panel.getBoundingClientRect().width;
+            
+            // Determine the last visible column dynamically
+            const activeCols = ['epicIssue', 'healthStatus', ...state.visibleColumns];
+            const lastCol = activeCols[activeCols.length - 1];
+            pStartColWidth = state.columnWidths[lastCol] || 100;
             
             document.body.classList.add('resizing-active');
             panelResizer.classList.add('resizing');
             
             const handlePanelMouseMove = (moveEvent) => {
                 const deltaX = moveEvent.clientX - pStartX;
-                const newWidth = Math.max(250, pStartWidth + deltaX); // Min width 250px
-                panel.style.width = newWidth + 'px';
-                panel.style.minWidth = newWidth + 'px';
-                panel.style.maxWidth = newWidth + 'px';
+                const newColWidth = Math.max(50, pStartColWidth + deltaX); // Min column width 50px
+                
+                // Update column width in state
+                state.columnWidths[lastCol] = newColWidth;
+                
+                // Update this column's cells live
+                const cells = document.querySelectorAll(`.cell-${lastCol}`);
+                cells.forEach(cell => {
+                    cell.style.width = newColWidth + 'px';
+                    cell.style.minWidth = newColWidth + 'px';
+                    cell.style.maxWidth = newColWidth + 'px';
+                });
+                
+                // Keep panel width and header group widths aligned
+                syncPanelWidth();
+                updateHeaderGroupWidths();
             };
 
             const handlePanelMouseUp = () => {
@@ -760,6 +791,9 @@ function renderTimeline() {
     
     // Re-trigger scroll sync to fix alignment
     issuesContainer.scrollTop = document.getElementById('timeline-panel').scrollTop;
+    
+    // Snaps the left issues-panel width exactly to the sum of all columns
+    syncPanelWidth();
 }
 
 // Generate columns, groups, headers metadata
