@@ -50,13 +50,7 @@
                 <span>Prioritize Blockers</span>
             </button>
 
-            <!-- Fields Selection Dropdown -->
-            <button class="btn" id="btn-fields" title="Toggle Visible Fields/Columns">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/>
-                </svg>
-                <span>Fields</span>
-            </button>
+
 
             <!-- Refresh Button -->
             <button class="btn btn-primary" id="btn-refresh">
@@ -82,6 +76,7 @@
     <main class="roadmap-container">
         <!-- Left Side: Issue Details List (Locked/Fixed Width) -->
         <section class="issues-panel" id="issues-panel">
+            <div id="issues-panel-resizer"></div>
             <div class="panel-header" id="issues-panel-header">
                 <!-- Columns dynamically rendered in JS -->
             </div>

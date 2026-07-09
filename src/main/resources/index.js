@@ -143,6 +143,41 @@ function initColumnResizing() {
         activeCol = null;
         affectedCells = [];
     }
+
+    // 2. Issues Panel Resizer
+    const panelResizer = document.getElementById('issues-panel-resizer');
+    const panel = document.getElementById('issues-panel');
+    if (panelResizer && panel) {
+        let pStartX = 0;
+        let pStartWidth = 0;
+
+        panelResizer.addEventListener('mousedown', (e) => {
+            pStartX = e.clientX;
+            pStartWidth = panel.getBoundingClientRect().width;
+            
+            document.body.classList.add('resizing-active');
+            panelResizer.classList.add('resizing');
+            
+            const handlePanelMouseMove = (moveEvent) => {
+                const deltaX = moveEvent.clientX - pStartX;
+                const newWidth = Math.max(250, pStartWidth + deltaX); // Min width 250px
+                panel.style.width = newWidth + 'px';
+                panel.style.minWidth = newWidth + 'px';
+                panel.style.maxWidth = newWidth + 'px';
+            };
+
+            const handlePanelMouseUp = () => {
+                document.body.classList.remove('resizing-active');
+                panelResizer.classList.remove('resizing');
+                document.removeEventListener('mousemove', handlePanelMouseMove);
+                document.removeEventListener('mouseup', handlePanelMouseUp);
+            };
+
+            document.addEventListener('mousemove', handlePanelMouseMove);
+            document.addEventListener('mouseup', handlePanelMouseUp);
+            e.preventDefault();
+        });
+    }
 }
 
 // ==========================================================================
@@ -180,9 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Toggle Fields popover
-    document.getElementById('btn-fields').addEventListener('click', toggleFields);
-
     // Close popovers on click outside
     document.addEventListener('click', (e) => {
         const statusPopover = document.getElementById('status-popover');
@@ -192,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const fieldsPopover = document.getElementById('fields-popover');
-        if (!e.target.closest('#btn-fields') && !e.target.closest('#btn-fields-inline') && !e.target.closest('.fields-popover')) {
+        if (!e.target.closest('#btn-fields-inline') && !e.target.closest('.fields-popover')) {
             fieldsPopover.style.display = 'none';
         }
     });
@@ -511,11 +543,11 @@ function renderHeadersRow() {
     gFields.className = 'header-cell group-fields';
     gFields.innerHTML = `
         <span>Fields</span>
-        <button id="btn-fields-inline" title="Toggle Visible Columns/Fields">
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3">
-                <path d="M12 5v14M5 12h14"/>
+        <button id="btn-fields-inline" class="dots-btn" title="Toggle Visible Columns/Fields">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <circle cx="12" cy="7" r="2.5"/>
+                <circle cx="12" cy="17" r="2.5"/>
             </svg>
-            <span>Add Field</span>
         </button>
     `;
     groupRow.appendChild(gFields);

@@ -343,6 +343,23 @@ body {
     z-index: 5;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.02);
     overflow-x: auto; /* Enable horizontal scrolling for columns */
+    position: relative; /* Support absolute-positioned child panel resizer */
+}
+
+#issues-panel-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: col-resize;
+    z-index: 100;
+    background-color: transparent;
+    transition: background-color var(--transition-fast);
+}
+
+#issues-panel-resizer:hover, #issues-panel-resizer.resizing {
+    background-color: var(--primary-blue);
 }
 
 .issues-panel .panel-header {
@@ -970,7 +987,7 @@ body {
     position: absolute;
     top: 54px;
     right: 130px;
-    background-color: var(--bg-dropdown);
+    background-color: var(--bg-header); /* Fully opaque background */
     border: 1px solid var(--border-color);
     border-radius: 6px;
     box-shadow: var(--shadow-dropdown);
@@ -980,6 +997,28 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+/* 2-Dots Button Styling */
+.dots-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    margin-left: auto;
+    width: 20px;
+    height: 20px;
+}
+
+.dots-btn:hover {
+    background-color: var(--bg-row-hover);
+    color: var(--text-primary);
 }
 
 .popover-title {
