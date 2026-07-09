@@ -1001,22 +1001,25 @@ body {
 
 /* Clickable dots text */
 .dots-text {
+    position: sticky;
+    right: 8px; /* Sticks to the right edge of the visible panel viewport */
     cursor: pointer;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 900;
     color: var(--primary-blue); /* High visibility Jira blue */
     user-select: none;
     padding: 0 4px;
-    margin-left: 6px; /* space between "Fields" and ".." */
+    margin-left: auto; /* Right-justify in the header group cell */
     transition: color var(--transition-fast), transform var(--transition-fast);
     display: inline-block;
     vertical-align: middle;
-    line-height: 1;
+    line-height: 10px; /* Explicit line height to prevent bottom border overlap */
+    transform: translateY(-2px); /* Shift up to center vertically in 28px height */
 }
 
 .dots-text:hover {
     color: var(--primary-blue-hover);
-    transform: scale(1.2); /* Premium interactive micro-animation */
+    transform: translateY(-2px) scale(1.2); /* Keep vertical offset on hover scale */
 }
 
 .popover-title {
@@ -1145,6 +1148,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 10px;
+    overflow: visible; /* Allow position: sticky child element to overflow cell boundary */
+    position: relative;
 }
 
 
