@@ -117,6 +117,53 @@ function syncPanelWidth() {
     }
 }
 
+function autoFitColumn(col) {
+    const cells = document.querySelectorAll(`.cell-${col}`);
+    let maxWidth = 0;
+    
+    cells.forEach(cell => {
+        // Temporarily reset styles to measure natural layout content width
+        const originalWidth = cell.style.width;
+        const originalMinWidth = cell.style.minWidth;
+        const originalMaxWidth = cell.style.maxWidth;
+        
+        cell.style.width = 'auto';
+        cell.style.minWidth = 'auto';
+        cell.style.maxWidth = 'auto';
+        
+        // Measure scrollWidth (with 12px padding buffer for clean layout)
+        const width = cell.scrollWidth + 12;
+        if (width > maxWidth) {
+            maxWidth = width;
+        }
+        
+        // Restore
+        cell.style.width = originalWidth;
+        cell.style.minWidth = originalMinWidth;
+        cell.style.maxWidth = originalMaxWidth;
+    });
+    
+    // Safety minimums
+    let finalWidth = Math.max(50, maxWidth);
+    if (col === 'epicIssue') {
+        finalWidth = Math.max(150, finalWidth);
+    }
+    
+    // Update state
+    state.columnWidths[col] = finalWidth;
+    
+    // Set style of all cells
+    cells.forEach(cell => {
+        cell.style.width = finalWidth + 'px';
+        cell.style.minWidth = finalWidth + 'px';
+        cell.style.maxWidth = finalWidth + 'px';
+    });
+    
+    syncPanelWidth();
+    updateHeaderGroupWidths();
+}
+
+
 function initColumnResizing() {
     let startX = 0;
     let startWidth = 0;
@@ -222,6 +269,12 @@ function initColumnResizing() {
             document.addEventListener('mousemove', handlePanelMouseMove);
             document.addEventListener('mouseup', handlePanelMouseUp);
             e.preventDefault();
+        });
+
+        // Double-clicking the main divider snaps the panel back to its snapped state
+        panelResizer.addEventListener('dblclick', () => {
+            state.isPanelSnapped = true;
+            syncPanelWidth();
         });
     }
 }
@@ -675,6 +728,14 @@ function renderHeadersRow() {
     if (inlineAddBtn) {
         inlineAddBtn.addEventListener('click', toggleFields);
     }
+    
+    // Bind double click listeners on column resizers for auto-fitting
+    subRow.querySelectorAll('.col-resizer').forEach(resizer => {
+        resizer.addEventListener('dblclick', (e) => {
+            const col = e.currentTarget.dataset.column;
+            autoFitColumn(col);
+        });
+    });
     
     // Bind filter input listeners
     subRow.querySelectorAll('.col-filter-input').forEach(input => {
