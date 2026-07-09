@@ -10,27 +10,25 @@ for /f "tokens=2,*" %%A in ('reg query "HKEY_CLASSES_ROOT\jarfile\shell\open\com
     set CMD_VAL=%%B
 )
 
-set JAVA_EXE=
-if not "%CMD_VAL%"=="" (
-    rem Extract the executable path inside quotes
-    for /f "tokens=1 delims=^"" %%I in ("%CMD_VAL%") do (
-        set JAVA_EXE=%%I
-    )
-)
+if not defined CMD_VAL goto :use_fallback
+
+set JAVA_EXE=%CMD_VAL%
+set JAVA_EXE=%JAVA_EXE: -jar "%1" %*=%
+set JAVA_EXE=%JAVA_EXE: -jar "%1"=%
+set JAVA_EXE=%JAVA_EXE: -jar =%
+set JAVA_EXE=%JAVA_EXE:"=%
 
 rem If we found javaw.exe, resolve it to java.exe in the same folder to preserve console logging
-if not "%JAVA_EXE%"=="" (
-    set JAVA_EXE=%JAVA_EXE:"=%
-    call set JAVA_EXE=%%JAVA_EXE:javaw.exe=java.exe%%
-)
+call set JAVA_EXE=%%JAVA_EXE:javaw.exe=java.exe%%
 
-if not "%JAVA_EXE%"=="" if exist "%JAVA_EXE%" (
+if exist "%JAVA_EXE%" (
     echo Found associated Java runtime at: "%JAVA_EXE%"
     echo Launching Jira Interactive Roadmap Dashboard...
     "%JAVA_EXE%" -jar JiraRoadmap.jar
     goto :end
 )
 
+:use_fallback
 rem Fallback to start command which emulates Windows double-click behavior
 echo WARNING: Could not find associated Java runtime path in registry.
 echo Launching using default Windows file association...
