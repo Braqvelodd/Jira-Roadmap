@@ -105,7 +105,7 @@ function hideLoader() {
 // Backend Integrations (JS-to-Java)
 // ==========================================================================
 function bootstrapApp() {
-    showLoader('Connecting to Jira...');
+    showLoader('Bootstrapping Settings...');
     if (typeof window.backend !== 'undefined') {
         try {
             // Load settings
@@ -116,8 +116,11 @@ function bootstrapApp() {
             document.getElementById('url-input').value = state.settings.jiraUrl || '';
             document.getElementById('jql-input').value = state.settings.jql || '';
 
-            // Load data
-            reloadData();
+            // Load local mock data immediately on start to support offline UI testing
+            state.roadmapData = getMockRoadmapData();
+            renderTimeline();
+            hideLoader();
+            showToast('Settings loaded. Click Refresh to query Jira.', 'success');
         } catch (e) {
             showToast('Error bootstrapping settings: ' + e, 'error');
             hideLoader();
