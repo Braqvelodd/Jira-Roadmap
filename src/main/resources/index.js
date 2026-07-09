@@ -28,6 +28,7 @@ let state = {
     timelineEnd: new Date(),
     activeStatusIssueId: null,
     visibleColumns: ['statusName', 'fixVersions'], // Optional fields (Health is permanent now!)
+    isPanelSnapped: true, // Tracks if left panel is snapped to max columns width
     columnWidths: {
         epicIssue: 250,
         healthStatus: 110,
@@ -94,14 +95,26 @@ function syncPanelWidth() {
     const panel = document.getElementById('issues-panel');
     if (!panel) return;
     
-    let totalWidth = (state.columnWidths.epicIssue || 250) + (state.columnWidths.healthStatus || 110);
+    let maxAllowed = (state.columnWidths.epicIssue || 250) + (state.columnWidths.healthStatus || 110);
     state.visibleColumns.forEach(col => {
-        totalWidth += state.columnWidths[col] || 100;
+        maxAllowed += state.columnWidths[col] || 100;
     });
     
-    panel.style.width = totalWidth + 'px';
-    panel.style.minWidth = totalWidth + 'px';
-    panel.style.maxWidth = totalWidth + 'px';
+    if (state.isPanelSnapped) {
+        panel.style.width = maxAllowed + 'px';
+        panel.style.minWidth = maxAllowed + 'px';
+        panel.style.maxWidth = maxAllowed + 'px';
+    } else {
+        const currentWidth = panel.getBoundingClientRect().width;
+        const newWidth = Math.min(currentWidth, maxAllowed);
+        panel.style.width = newWidth + 'px';
+        panel.style.minWidth = newWidth + 'px';
+        panel.style.maxWidth = newWidth + 'px';
+        
+        if (newWidth >= maxAllowed) {
+            state.isPanelSnapped = true;
+        }
+    }
 }
 
 function initColumnResizing() {
@@ -159,42 +172,44 @@ function initColumnResizing() {
         affectedCells = [];
     }
 
-    // 2. Issues Panel Resizer (resizes the last visible column in real-time)
+    // 2. Issues Panel Resizer (resizes the panel width independently of columns)
     const panelResizer = document.getElementById('issues-panel-resizer');
     const panel = document.getElementById('issues-panel');
     if (panelResizer && panel) {
         let pStartX = 0;
-        let pStartColWidth = 0;
+        let pStartWidth = 0;
 
         panelResizer.addEventListener('mousedown', (e) => {
             pStartX = e.clientX;
-            
-            // Determine the last visible column dynamically
-            const activeCols = ['epicIssue', 'healthStatus', ...state.visibleColumns];
-            const lastCol = activeCols[activeCols.length - 1];
-            pStartColWidth = state.columnWidths[lastCol] || 100;
+            pStartWidth = panel.getBoundingClientRect().width;
             
             document.body.classList.add('resizing-active');
             panelResizer.classList.add('resizing');
             
             const handlePanelMouseMove = (moveEvent) => {
                 const deltaX = moveEvent.clientX - pStartX;
-                const newColWidth = Math.max(50, pStartColWidth + deltaX); // Min column width 50px
                 
-                // Update column width in state
-                state.columnWidths[lastCol] = newColWidth;
-                
-                // Update this column's cells live
-                const cells = document.querySelectorAll(`.cell-${lastCol}`);
-                cells.forEach(cell => {
-                    cell.style.width = newColWidth + 'px';
-                    cell.style.minWidth = newColWidth + 'px';
-                    cell.style.maxWidth = newColWidth + 'px';
+                // Calculate max allowed width (sum of all columns)
+                let maxAllowed = (state.columnWidths.epicIssue || 250) + (state.columnWidths.healthStatus || 110);
+                state.visibleColumns.forEach(col => {
+                    maxAllowed += state.columnWidths[col] || 100;
                 });
+
+                let newWidth = pStartWidth + deltaX;
                 
-                // Keep panel width and header group widths aligned
-                syncPanelWidth();
-                updateHeaderGroupWidths();
+                if (newWidth >= maxAllowed) {
+                    newWidth = maxAllowed;
+                    state.isPanelSnapped = true;
+                } else {
+                    state.isPanelSnapped = false;
+                }
+                
+                // Allow shrinking all the way down to 180px for maximum roadmap size
+                newWidth = Math.max(180, newWidth);
+                
+                panel.style.width = newWidth + 'px';
+                panel.style.minWidth = newWidth + 'px';
+                panel.style.maxWidth = newWidth + 'px';
             };
 
             const handlePanelMouseUp = () => {
