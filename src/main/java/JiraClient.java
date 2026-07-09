@@ -102,8 +102,8 @@ public class JiraClient {
         URL url = new URL(targetUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(method);
-        conn.setConnectTimeout(15000);
-        conn.setReadTimeout(30000);
+        conn.setConnectTimeout(4000);
+        conn.setReadTimeout(8000);
 
         if (conn instanceof HttpsURLConnection) {
             HttpsURLConnection sconn = (HttpsURLConnection) conn;

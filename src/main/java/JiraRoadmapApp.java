@@ -40,12 +40,12 @@ public class JiraRoadmapApp extends Application {
                 alert.showAndWait();
             }
 
-            // 5. Initialize Controller
-            jiraController = new JiraController(jiraClient, configManager);
-
             // 6. Setup WebView & WebView Bridge
             WebView webView = new WebView();
             WebEngine webEngine = webView.getEngine();
+
+            // 5. Initialize Controller
+            jiraController = new JiraController(jiraClient, configManager, webEngine);
 
             // Enable JavaScript alert/confirm dialogs inside JavaFX WebView
             webEngine.setOnAlert(event -> {

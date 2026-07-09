@@ -146,30 +146,18 @@ function reloadData() {
     
     showLoader('Fetching roadmap data...');
     if (typeof window.backend !== 'undefined') {
-        // Run in background to prevent UI freeze
-        setTimeout(() => {
-            try {
-                // Update the settings configuration on the backend
-                window.backend.updateSettings(newUrl, newJql);
-                state.settings.jiraUrl = newUrl;
-                state.settings.jql = newJql;
+        try {
+            // Update the settings configuration on the backend
+            window.backend.updateSettings(newUrl, newJql);
+            state.settings.jiraUrl = newUrl;
+            state.settings.jql = newJql;
 
-                const dataJson = window.backend.getRoadmapData();
-                const parsed = JSON.parse(dataJson);
-                
-                if (parsed.success === false) {
-                    showToast('Jira API Error: ' + parsed.error, 'error');
-                } else {
-                    state.roadmapData = parsed;
-                    renderTimeline();
-                    showToast('Roadmap sync completed successfully', 'success');
-                }
-            } catch (e) {
-                showToast('Connection failed: ' + e, 'error');
-            } finally {
-                hideLoader();
-            }
-        }, 100);
+            // Trigger non-blocking asynchronous fetch
+            window.backend.fetchRoadmapData();
+        } catch (e) {
+            showToast('Failed to trigger update: ' + e, 'error');
+            hideLoader();
+        }
     } else {
         state.settings.jiraUrl = newUrl;
         state.settings.jql = newJql;
@@ -181,27 +169,38 @@ function reloadData() {
     }
 }
 
+// Global asynchronous callback hooks called by the Java Controller background thread
+window.onRoadmapDataLoaded = function(dataJson) {
+    hideLoader();
+    try {
+        const parsed = JSON.parse(dataJson);
+        if (parsed.success === false) {
+            showToast('Jira API Error: ' + parsed.error, 'error');
+        } else {
+            state.roadmapData = parsed;
+            renderTimeline();
+            showToast('Roadmap sync completed successfully', 'success');
+        }
+    } catch (e) {
+        showToast('Failed to parse data: ' + e, 'error');
+    }
+};
+
+window.onRoadmapDataError = function(errorMessage) {
+    hideLoader();
+    showToast('Connection failed: ' + errorMessage, 'error');
+};
+
 function updateStatusInJira(issueId, newStatus) {
     showLoader(`Updating status for ${issueId}...`);
     if (typeof window.backend !== 'undefined') {
-        setTimeout(() => {
-            try {
-                const responseJson = window.backend.updateIssueStatus(issueId, newStatus);
-                const response = JSON.parse(responseJson);
-                
-                if (response.success) {
-                    // Update local state and re-render
-                    updateLocalStatus(issueId, newStatus);
-                    showToast(`Status updated successfully for ${issueId}`, 'success');
-                } else {
-                    showToast(`Failed to update: ${response.error}`, 'error');
-                }
-            } catch (e) {
-                showToast(`Failed to connect to backend: ${e}`, 'error');
-            } finally {
-                hideLoader();
-            }
-        }, 100);
+        try {
+            // Trigger non-blocking asynchronous status update
+            window.backend.updateIssueStatus(issueId, newStatus);
+        } catch (e) {
+            showToast('Failed to request status change: ' + e, 'error');
+            hideLoader();
+        }
     } else {
         // Mock success in browser testing
         setTimeout(() => {
@@ -209,6 +208,22 @@ function updateStatusInJira(issueId, newStatus) {
             hideLoader();
             showToast(`[Mock] Status updated for ${issueId} to ${newStatus}`, 'success');
         }, 500);
+    }
+}
+
+// Global asynchronous callback hook for status updates called by the Java Controller background thread
+window.onStatusUpdated = function(responseJson) {
+    hideLoader();
+    try {
+        const response = JSON.parse(responseJson);
+        if (response.success) {
+            updateLocalStatus(response.issueId, response.healthStatus);
+            showToast(`Status updated successfully for ${response.issueId}`, 'success');
+        } else {
+            showToast(`Failed to update status: ${response.error}`, 'error');
+        }
+    } catch (e) {
+        showToast('Error parsing status response: ' + e, 'error');
     }
 }
 

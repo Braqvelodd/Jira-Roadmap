@@ -1,12 +1,20 @@
 import com.google.gson.JsonObject;
+import javafx.application.Platform;
+import javafx.scene.web.WebEngine;
+import netscape.javascript.JSObject;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class JiraController {
     private final JiraClient jiraClient;
     private final ConfigManager configManager;
+    private final WebEngine webEngine;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    public JiraController(JiraClient jiraClient, ConfigManager configManager) {
+    public JiraController(JiraClient jiraClient, ConfigManager configManager, WebEngine webEngine) {
         this.jiraClient = jiraClient;
         this.configManager = configManager;
+        this.webEngine = webEngine;
     }
 
     /**
@@ -23,37 +31,93 @@ public class JiraController {
     }
 
     /**
-     * Called by JavaScript frontend to fetch all epics and issues matching JQL
+     * Asynchronously fetches all epics and issues matching JQL, then triggers a JS callback
      */
-    public String getRoadmapData() {
-        try {
-            String jql = configManager.getProperty("jira.jql", "");
-            String epicLinkField = configManager.getProperty("jira.epicLinkField", "customfield_10014");
-            String startDateField = configManager.getProperty("jira.startDateField", "customfield_10015");
-            String endDateField = configManager.getProperty("jira.endDateField", "duedate");
+    public void fetchRoadmapData() {
+        executor.submit(() -> {
+            try {
+                String jql = configManager.getProperty("jira.jql", "");
+                String epicLinkField = configManager.getProperty("jira.epicLinkField", "customfield_10014");
+                String startDateField = configManager.getProperty("jira.startDateField", "customfield_10015");
+                String endDateField = configManager.getProperty("jira.endDateField", "duedate");
 
-            return jiraClient.getRoadmapData(jql, epicLinkField, startDateField, endDateField);
-        } catch (Exception e) {
-            System.err.println("Jira connection failed. Falling back to Mock Data for local UI testing.");
-            e.printStackTrace();
-            return getMockRoadmapDataJson();
-        }
+                String dataJson;
+                try {
+                    dataJson = jiraClient.getRoadmapData(jql, epicLinkField, startDateField, endDateField);
+                } catch (Exception e) {
+                    System.err.println("Jira connection failed. Falling back to Mock Data for local UI testing.");
+                    e.printStackTrace();
+                    dataJson = getMockRoadmapDataJson();
+                }
+
+                final String result = dataJson;
+                Platform.runLater(() -> {
+                    try {
+                        JSObject window = (JSObject) webEngine.executeScript("window");
+                        window.call("onRoadmapDataLoaded", result);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                final String errorMsg = e.getMessage() != null ? e.getMessage() : e.toString();
+                Platform.runLater(() -> {
+                    try {
+                        JSObject window = (JSObject) webEngine.executeScript("window");
+                        window.call("onRoadmapDataError", errorMsg);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }
+        });
     }
 
     /**
-     * Called by JavaScript frontend to update the status label of a specific issue
+     * Asynchronously updates the status label of a specific issue, then triggers a JS callback
      */
-    public String updateIssueStatus(String issueId, String newStatus) {
-        try {
-            return jiraClient.updateIssueStatus(issueId, newStatus);
-        } catch (Exception e) {
-            System.out.println("Jira connection failed. Mocking update status success: " + issueId + " -> " + newStatus);
-            JsonObject successObj = new JsonObject();
-            successObj.addProperty("success", true);
-            successObj.addProperty("issueId", issueId);
-            successObj.addProperty("healthStatus", newStatus);
-            return successObj.toString();
-        }
+    public void updateIssueStatus(String issueId, String newStatus) {
+        executor.submit(() -> {
+            try {
+                String responseJson;
+                try {
+                    responseJson = jiraClient.updateIssueStatus(issueId, newStatus);
+                } catch (Exception e) {
+                    System.out.println("Jira connection failed. Mocking update status success: " + issueId + " -> " + newStatus);
+                    JsonObject successObj = new JsonObject();
+                    successObj.addProperty("success", true);
+                    successObj.addProperty("issueId", issueId);
+                    successObj.addProperty("healthStatus", newStatus);
+                    responseJson = successObj.toString();
+                }
+
+                final String result = responseJson;
+                Platform.runLater(() -> {
+                    try {
+                        JSObject window = (JSObject) webEngine.executeScript("window");
+                        window.call("onStatusUpdated", result);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                JsonObject errorObj = new JsonObject();
+                errorObj.addProperty("success", false);
+                errorObj.addProperty("error", e.getMessage() != null ? e.getMessage() : e.toString());
+                final String result = errorObj.toString();
+                Platform.runLater(() -> {
+                    try {
+                        JSObject window = (JSObject) webEngine.executeScript("window");
+                        window.call("onStatusUpdated", result);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }
+        });
     }
 
     /**
