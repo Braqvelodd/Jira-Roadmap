@@ -1002,17 +1002,21 @@ body {
 /* Clickable dots text */
 .dots-text {
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-muted);
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--primary-blue); /* High visibility Jira blue */
     user-select: none;
     padding: 0 4px;
-    margin-left: 8px; /* space between "Fields" and ".." */
-    transition: color var(--transition-fast);
+    margin-left: 6px; /* space between "Fields" and ".." */
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
 }
 
 .dots-text:hover {
-    color: var(--primary-blue);
+    color: var(--primary-blue-hover);
+    transform: scale(1.2); /* Premium interactive micro-animation */
 }
 
 .popover-title {
