@@ -334,7 +334,7 @@ body {
 
 /* Issues left panel */
 .issues-panel {
-    width: 420px;
+    width: 520px;
     flex-shrink: 0;
     background-color: var(--bg-panel-left);
     border-right: 1px solid var(--border-color);
@@ -342,6 +342,7 @@ body {
     flex-direction: column;
     z-index: 5;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.02);
+    overflow-x: auto; /* Enable horizontal scrolling for columns */
 }
 
 .issues-panel .panel-header {
@@ -349,20 +350,24 @@ body {
     border-bottom: 1px solid var(--border-color);
     background-color: var(--bg-header-row);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    font-size: 12px;
+    align-items: stretch;
+    width: max-content;
+    min-width: 100%;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     flex-shrink: 0;
+    padding: 0;
 }
 
 .issues-panel .panel-rows {
     flex-grow: 1;
     overflow-y: hidden; /* Scrolled programmatically in sync with right pane */
+    overflow-x: hidden;
+    width: max-content;
+    min-width: 100%;
 }
 
 /* Right timeline panel */
@@ -462,8 +467,11 @@ body {
 
 /* Left panel row content */
 .issue-row {
-    padding: 0 16px;
-    justify-content: space-between;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    width: max-content;
+    min-width: 100%;
 }
 
 .issue-info {
@@ -472,6 +480,7 @@ body {
     gap: 8px;
     min-width: 0;
     flex-grow: 1;
+    height: 100%;
 }
 
 .expander-btn {
@@ -858,4 +867,190 @@ body {
    ========================================================================== */
 .child-collapsed-row {
     display: none !important;
+}
+
+/* ==========================================================================
+   Table Columns, Cells, & Filtering Layout
+   ========================================================================== */
+.header-cell, .body-cell {
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border-grid);
+    padding: 0 12px;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.header-cell {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-cell-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.col-filter-input {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 10px;
+    color: var(--text-primary);
+    box-sizing: border-box;
+}
+
+.col-filter-input::placeholder {
+    color: var(--text-muted);
+}
+
+.col-filter-input:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+/* Column Width Specifications */
+.cell-epic-issue {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-right: 1px solid var(--border-grid);
+    padding-left: 16px;
+}
+
+.cell-statusName {
+    width: 110px;
+    flex-shrink: 0;
+}
+
+.cell-priority {
+    width: 85px;
+    flex-shrink: 0;
+}
+
+.cell-assignee {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.cell-fixVersions {
+    width: 110px;
+    flex-shrink: 0;
+}
+
+.cell-startDate {
+    width: 95px;
+    flex-shrink: 0;
+}
+
+.cell-endDate {
+    width: 95px;
+    flex-shrink: 0;
+}
+
+.cell-healthStatus {
+    width: 115px;
+    flex-shrink: 0;
+}
+
+/* Fields Popover Menu */
+.fields-popover {
+    position: absolute;
+    top: 54px;
+    right: 130px;
+    background-color: var(--bg-dropdown);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: var(--shadow-dropdown);
+    width: 180px;
+    padding: 10px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.popover-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 4px;
+}
+
+.popover-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background-color var(--transition-fast);
+}
+
+.popover-checkbox-item:hover {
+    background-color: var(--bg-row-hover);
+}
+
+.popover-checkbox-item input[type="checkbox"] {
+    cursor: pointer;
+}
+
+/* Jira status category badges */
+.status-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-badge.status-new {
+    background-color: var(--bg-row-hover);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.status-badge.status-indeterminate {
+    background-color: rgba(7, 71, 166, 0.1);
+    color: #0747a6;
+    border: 1px solid rgba(7, 71, 166, 0.2);
+}
+
+.dark-theme .status-badge.status-indeterminate {
+    color: #4c9aff;
+    background-color: rgba(76, 154, 255, 0.15);
+    border-color: rgba(76, 154, 255, 0.25);
+}
+
+.status-badge.status-done {
+    background-color: rgba(0, 102, 68, 0.1);
+    color: #006644;
+    border: 1px solid rgba(0, 102, 68, 0.2);
+}
+
+.dark-theme .status-badge.status-done {
+    color: #36b37e;
+    background-color: rgba(54, 179, 126, 0.15);
+    border-color: rgba(54, 179, 126, 0.25);
 }

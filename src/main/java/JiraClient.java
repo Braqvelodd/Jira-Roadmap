@@ -184,7 +184,7 @@ public class JiraClient {
     // Fetches roadmap data, parses JQL, groups child issues under epics, and returns JSON
     public String getRoadmapData(String jql, String epicLinkField, String startDateField, String endDateField) throws Exception {
         String encodedJql = URLEncoder.encode(jql, "UTF-8");
-        String fields = "key,summary,status,issuetype,labels,parent," + epicLinkField + "," + startDateField + "," + endDateField;
+        String fields = "key,summary,status,priority,assignee,fixVersions,issuetype,labels,parent," + epicLinkField + "," + startDateField + "," + endDateField;
         String url = jiraUrl + "/rest/api/2/search?jql=" + encodedJql + "&fields=" + fields + "&maxResults=1000";
 
         String jsonResponse = executeGetRequest(url);
@@ -205,6 +205,23 @@ public class JiraClient {
             String statusName = statusObj != null ? getNullableString(statusObj, "name") : "";
             JsonObject statusCategoryObj = statusObj != null ? statusObj.getAsJsonObject("statusCategory") : null;
             String statusCategory = statusCategoryObj != null ? getNullableString(statusCategoryObj, "key") : "new";
+
+            JsonObject priorityObj = fieldsObj.getAsJsonObject("priority");
+            String priorityName = priorityObj != null ? getNullableString(priorityObj, "name") : "";
+
+            JsonObject assigneeObj = fieldsObj.getAsJsonObject("assignee");
+            String assigneeName = assigneeObj != null ? getNullableString(assigneeObj, "displayName") : "";
+
+            JsonArray fixVersionsArray = fieldsObj.getAsJsonArray("fixVersions");
+            StringBuilder fixVersionsBuilder = new StringBuilder();
+            if (fixVersionsArray != null) {
+                for (int i = 0; i < fixVersionsArray.size(); i++) {
+                    JsonObject versionObj = fixVersionsArray.get(i).getAsJsonObject();
+                    if (i > 0) fixVersionsBuilder.append(", ");
+                    fixVersionsBuilder.append(getNullableString(versionObj, "name"));
+                }
+            }
+            String fixVersions = fixVersionsBuilder.toString();
 
             JsonObject issueTypeObj = fieldsObj.getAsJsonObject("issuetype");
             String issueType = issueTypeObj != null ? getNullableString(issueTypeObj, "name") : "";
@@ -243,6 +260,9 @@ public class JiraClient {
             issueMap.put("summary", summary);
             issueMap.put("statusName", statusName);
             issueMap.put("statusCategory", statusCategory);
+            issueMap.put("priority", priorityName);
+            issueMap.put("assignee", assigneeName);
+            issueMap.put("fixVersions", fixVersions);
             issueMap.put("healthStatus", healthStatus);
             issueMap.put("startDate", startDate);
             issueMap.put("endDate", endDate);

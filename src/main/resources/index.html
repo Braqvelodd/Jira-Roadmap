@@ -50,6 +50,14 @@
                 <span>Prioritize Blockers</span>
             </button>
 
+            <!-- Fields Selection Dropdown -->
+            <button class="btn" id="btn-fields" title="Toggle Visible Fields/Columns">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/>
+                </svg>
+                <span>Fields</span>
+            </button>
+
             <!-- Refresh Button -->
             <button class="btn btn-primary" id="btn-refresh">
                 <svg class="icon-refresh" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -74,9 +82,8 @@
     <main class="roadmap-container">
         <!-- Left Side: Issue Details List (Locked/Fixed Width) -->
         <section class="issues-panel" id="issues-panel">
-            <div class="panel-header">
-                <span>Epic / Issue</span>
-                <span>Health</span>
+            <div class="panel-header" id="issues-panel-header">
+                <!-- Columns dynamically rendered in JS -->
             </div>
             <div class="panel-rows" id="issues-list-container">
                 <!-- Dynamic Content Loaded Here -->
@@ -112,6 +119,33 @@
         <button class="popover-item status-clear" data-status="none">
             Clear status label
         </button>
+    </div>
+
+    <!-- Fields Selector Popover -->
+    <div class="fields-popover" id="fields-popover" style="display: none;">
+        <div class="popover-title">Visible Fields</div>
+        <hr class="popover-divider">
+        <label class="popover-checkbox-item">
+            <input type="checkbox" data-column="statusName"> Status
+        </label>
+        <label class="popover-checkbox-item">
+            <input type="checkbox" data-column="priority"> Priority
+        </label>
+        <label class="popover-checkbox-item">
+            <input type="checkbox" data-column="assignee"> Assignee
+        </label>
+        <label class="popover-checkbox-item">
+            <input type="checkbox" data-column="fixVersions"> Fix Version
+        </label>
+        <label class="popover-checkbox-item">
+            <input type="checkbox" data-column="startDate"> Start Date
+        </label>
+        <label class="popover-checkbox-item">
+            <input type="checkbox" data-column="endDate"> Due Date
+        </label>
+        <label class="popover-checkbox-item">
+            <input type="checkbox" data-column="healthStatus" checked> Health Status
+        </label>
     </div>
 
     <!-- Loader Backdrop -->

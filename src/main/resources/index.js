@@ -26,7 +26,18 @@ let state = {
     collapsedEpics: new Set(),
     timelineStart: new Date(),
     timelineEnd: new Date(),
-    activeStatusIssueId: null
+    activeStatusIssueId: null,
+    visibleColumns: ['statusName', 'fixVersions', 'healthStatus'], // Default visible columns
+    filters: {
+        epicIssue: '',
+        statusName: '',
+        priority: '',
+        assignee: '',
+        fixVersions: '',
+        startDate: '',
+        endDate: '',
+        healthStatus: ''
+    }
 };
 
 // Epic Bar Colors Palette (light & dark map)
@@ -73,13 +84,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Close popover on click outside
+    // Toggle Fields popover
+    document.getElementById('btn-fields').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const popover = document.getElementById('fields-popover');
+        popover.style.display = popover.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    // Close popovers on click outside
     document.addEventListener('click', (e) => {
-        const popover = document.getElementById('status-popover');
+        const statusPopover = document.getElementById('status-popover');
         if (!e.target.closest('.health-badge') && !e.target.closest('.status-popover')) {
-            popover.style.display = 'none';
+            statusPopover.style.display = 'none';
             state.activeStatusIssueId = null;
         }
+
+        const fieldsPopover = document.getElementById('fields-popover');
+        if (!e.target.closest('#btn-fields') && !e.target.closest('.fields-popover')) {
+            fieldsPopover.style.display = 'none';
+        }
+    });
+
+    // Bind checkbox items inside fields-popover
+    document.querySelectorAll('.fields-popover input[type="checkbox"]').forEach(cb => {
+        const colName = cb.dataset.column;
+        cb.checked = state.visibleColumns.includes(colName);
+
+        cb.addEventListener('change', () => {
+            const visible = [];
+            document.querySelectorAll('.fields-popover input[type="checkbox"]').forEach(c => {
+                if (c.checked) {
+                    visible.push(c.dataset.column);
+                }
+            });
+            state.visibleColumns = visible;
+            renderTimeline();
+        });
     });
 
     // Handle status popover items click
@@ -322,11 +362,104 @@ function getColWidth() {
 // ==========================================================================
 // UI Rendering Engines
 // ==========================================================================
+function matchIssue(issue, filters) {
+    for (const [key, value] of Object.entries(filters)) {
+        if (!value) continue;
+        
+        if (key === 'epicIssue') {
+            const keyMatch = (issue.key || '').toLowerCase().includes(value);
+            const summaryMatch = (issue.summary || '').toLowerCase().includes(value);
+            if (!keyMatch && !summaryMatch) return false;
+        } else {
+            const val = String(issue[key] || '').toLowerCase();
+            if (!val.includes(value)) return false;
+        }
+    }
+    return true;
+}
+
+function renderHeadersRow() {
+    const headerContainer = document.getElementById('issues-panel-header');
+    headerContainer.innerHTML = '';
+    
+    // Always add Epic/Issue column
+    const epicHeader = document.createElement('div');
+    epicHeader.className = 'header-cell cell-epic-issue';
+    epicHeader.innerHTML = `
+        <div class="header-cell-title">Epic / Issue</div>
+        <input type="text" class="col-filter-input" data-filter="epicIssue" placeholder="Search..." value="${state.filters.epicIssue || ''}">
+    `;
+    headerContainer.appendChild(epicHeader);
+    
+    // Add other toggled columns
+    const columnMeta = {
+        statusName: 'Status',
+        priority: 'Priority',
+        assignee: 'Assignee',
+        fixVersions: 'Fix Version',
+        startDate: 'Start Date',
+        endDate: 'Due Date',
+        healthStatus: 'Health'
+    };
+    
+    state.visibleColumns.forEach(col => {
+        const label = columnMeta[col] || col;
+        const colHeader = document.createElement('div');
+        colHeader.className = `header-cell cell-${col}`;
+        colHeader.innerHTML = `
+            <div class="header-cell-title">${label}</div>
+            <input type="text" class="col-filter-input" data-filter="${col}" placeholder="Filter..." value="${state.filters[col] || ''}">
+        `;
+        headerContainer.appendChild(colHeader);
+    });
+    
+    // Bind filter input listeners
+    headerContainer.querySelectorAll('.col-filter-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const filterType = e.currentTarget.dataset.filter;
+            state.filters[filterType] = e.currentTarget.value.trim().toLowerCase();
+            renderTimeline();
+            
+            // Retain focus on the input after re-rendering
+            const activeId = e.currentTarget.dataset.filter;
+            setTimeout(() => {
+                const refreshedInput = document.querySelector(`.col-filter-input[data-filter="${activeId}"]`);
+                if (refreshedInput) {
+                    refreshedInput.focus();
+                    // Set cursor to the end
+                    const val = refreshedInput.value;
+                    refreshedInput.value = '';
+                    refreshedInput.value = val;
+                }
+            }, 10);
+        });
+    });
+}
+
 function renderTimeline() {
     calculateTimelineBounds();
     
-    // 1. Process and sort data
-    let processedData = JSON.parse(JSON.stringify(state.roadmapData)); // deep clone
+    // Render dynamic table column headers
+    renderHeadersRow();
+    
+    // 1. Process, filter, and sort data
+    let processedData = [];
+    
+    state.roadmapData.forEach(epic => {
+        const epicCopy = JSON.parse(JSON.stringify(epic)); // deep clone
+        
+        // Filter child issues first
+        if (epicCopy.childIssues) {
+            epicCopy.childIssues = epicCopy.childIssues.filter(child => matchIssue(child, state.filters));
+        }
+        
+        const epicMatches = matchIssue(epicCopy, state.filters);
+        const hasMatchingChildren = epicCopy.childIssues && epicCopy.childIssues.length > 0;
+        
+        if (epicMatches || hasMatchingChildren) {
+            processedData.push(epicCopy);
+        }
+    });
     
     if (state.prioritizeRed) {
         // Sort epics: float those with RED status or containing child with RED status to top
@@ -536,6 +669,10 @@ function createLeftRow(issue, isChild = false, extraClass = '', isCollapsed = fa
     row.className = `row-item issue-row ${extraClass}`;
     row.dataset.key = issue.key;
 
+    // 1. Summary Column
+    const summaryCell = document.createElement('div');
+    summaryCell.className = 'body-cell cell-epic-issue';
+
     const info = document.createElement('div');
     info.className = 'issue-info';
 
@@ -581,8 +718,7 @@ function createLeftRow(issue, isChild = false, extraClass = '', isCollapsed = fa
     if (state.settings.jiraUrl && issue.key !== 'ISSUES-WITHOUT-EPICS') {
         keyLink.style.cursor = 'pointer';
         keyLink.addEventListener('click', () => {
-            // Open issue in system browser via alert bridge or redirect. 
-            // In JavaFX WebView, the user clicking this can be alerted to open locally.
+            // Open issue in system browser via alert bridge
             alert(`Opening Issue: ${state.settings.jiraUrl}/browse/${issue.key}`);
         });
     }
@@ -595,36 +731,55 @@ function createLeftRow(issue, isChild = false, extraClass = '', isCollapsed = fa
     summary.title = issue.summary;
     info.appendChild(summary);
 
-    row.appendChild(info);
+    summaryCell.appendChild(info);
+    row.appendChild(summaryCell);
 
-    // Health Status Badge (excluding orphan category header)
-    if (issue.key !== 'ISSUES-WITHOUT-EPICS') {
-        const health = document.createElement('div');
-        const badgeStatus = issue.healthStatus || 'none';
-        health.className = `health-badge ${badgeStatus}`;
-        
-        let labelText = 'No problems';
-        if (badgeStatus === 'yellow') labelText = 'Minor problems';
-        else if (badgeStatus === 'red') labelText = 'Severe limitations';
-        else if (badgeStatus === 'none') labelText = 'Set status';
+    // 2. Extra Columns Cells
+    state.visibleColumns.forEach(col => {
+        const cell = document.createElement('div');
+        cell.className = `body-cell cell-${col}`;
 
-        health.innerHTML = `
-            <span class="badge-dot"></span>
-            <span>${labelText}</span>
-        `;
+        if (issue.key === 'ISSUES-WITHOUT-EPICS') {
+            row.appendChild(cell);
+            return;
+        }
+
+        if (col === 'statusName') {
+            const statusSpan = document.createElement('span');
+            let catClass = 'status-new';
+            if (issue.statusCategory === 'done') catClass = 'status-done';
+            else if (issue.statusCategory === 'indeterminate') catClass = 'status-indeterminate';
+            
+            statusSpan.className = `status-badge ${catClass}`;
+            statusSpan.innerText = issue.statusName || '';
+            cell.appendChild(statusSpan);
+        } else if (col === 'healthStatus') {
+            const health = document.createElement('div');
+            const badgeStatus = issue.healthStatus || 'none';
+            health.className = `health-badge ${badgeStatus}`;
+            
+            let labelText = 'No problems';
+            if (badgeStatus === 'yellow') labelText = 'Minor problems';
+            else if (badgeStatus === 'red') labelText = 'Severe limitations';
+            else if (badgeStatus === 'none') labelText = 'Set status';
+
+            health.innerHTML = `
+                <span class="badge-dot"></span>
+                <span>${labelText}</span>
+            `;
+            
+            // Show status update popover
+            health.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showStatusPopover(e, issue.key);
+            });
+            cell.appendChild(health);
+        } else {
+            cell.innerText = issue[col] || '';
+        }
         
-        // Show status update popover
-        health.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showStatusPopover(e, issue.key);
-        });
-        row.appendChild(health);
-    } else {
-        // Spacer for clean layout aligning
-        const spacer = document.createElement('div');
-        spacer.style.width = '120px';
-        row.appendChild(spacer);
-    }
+        row.appendChild(cell);
+    });
 
     return row;
 }
@@ -804,6 +959,9 @@ function getMockRoadmapData() {
             issueType: "Epic",
             statusName: "In Progress",
             statusCategory: "indeterminate",
+            priority: "High",
+            assignee: "Sarah Jenkins",
+            fixVersions: "2026.10.20",
             healthStatus: "red",
             startDate: "2026-06-01",
             endDate: "2026-08-15",
@@ -814,6 +972,9 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "Done",
                     statusCategory: "done",
+                    priority: "High",
+                    assignee: "Sarah Jenkins",
+                    fixVersions: "2026.10.20",
                     healthStatus: "green",
                     startDate: "2026-06-01",
                     endDate: "2026-06-15"
@@ -824,6 +985,9 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "In Progress",
                     statusCategory: "indeterminate",
+                    priority: "Medium",
+                    assignee: "Alex River",
+                    fixVersions: "2026.10.20",
                     healthStatus: "yellow",
                     startDate: "2026-06-10",
                     endDate: "2026-07-05"
@@ -834,6 +998,9 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "To Do",
                     statusCategory: "new",
+                    priority: "High",
+                    assignee: "Sarah Jenkins",
+                    fixVersions: "2026.10.20",
                     healthStatus: "red",
                     startDate: "2026-07-06",
                     endDate: "2026-08-15"
@@ -846,6 +1013,9 @@ function getMockRoadmapData() {
             issueType: "Epic",
             statusName: "In Progress",
             statusCategory: "indeterminate",
+            priority: "Medium",
+            assignee: "Alex River",
+            fixVersions: "2026.11.00",
             healthStatus: "yellow",
             startDate: "2026-06-15",
             endDate: "2026-09-01",
@@ -856,6 +1026,9 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "Done",
                     statusCategory: "done",
+                    priority: "Medium",
+                    assignee: "David Chen",
+                    fixVersions: "2026.11.00",
                     healthStatus: "green",
                     startDate: "2026-06-15",
                     endDate: "2026-07-01"
@@ -866,6 +1039,9 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "Done",
                     statusCategory: "done",
+                    priority: "Low",
+                    assignee: "Alex River",
+                    fixVersions: "2026.11.00",
                     healthStatus: "green",
                     startDate: "2026-07-02",
                     endDate: "2026-07-07"
@@ -876,6 +1052,9 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "In Progress",
                     statusCategory: "indeterminate",
+                    priority: "Medium",
+                    assignee: "Alex River",
+                    fixVersions: "2026.11.00",
                     healthStatus: "none",
                     startDate: "2026-07-08",
                     endDate: "2026-07-28"
@@ -886,6 +1065,9 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "To Do",
                     statusCategory: "new",
+                    priority: "High",
+                    assignee: "David Chen",
+                    fixVersions: "2026.11.00",
                     healthStatus: "none",
                     startDate: "2026-08-01",
                     endDate: "2026-09-01"
@@ -898,6 +1080,9 @@ function getMockRoadmapData() {
             issueType: "Epic",
             statusName: "To Do",
             statusCategory: "new",
+            priority: "High",
+            assignee: "Emma Watson",
+            fixVersions: "2026.12.00",
             healthStatus: "none",
             startDate: "2026-08-20",
             endDate: "2026-09-30",
@@ -908,9 +1093,67 @@ function getMockRoadmapData() {
                     issueType: "Story",
                     statusName: "To Do",
                     statusCategory: "new",
+                    priority: "High",
+                    assignee: "Emma Watson",
+                    fixVersions: "2026.12.00",
                     healthStatus: "none",
                     startDate: null,
                     endDate: null
+                }
+            ]
+        },
+        {
+            key: "PROJ-401",
+            summary: "Empty Epic with no child issues",
+            issueType: "Epic",
+            statusName: "To Do",
+            statusCategory: "new",
+            priority: "Low",
+            assignee: "Marcus Aurelius",
+            fixVersions: "2026.10.20",
+            healthStatus: "green",
+            startDate: "2026-07-01",
+            endDate: "2026-07-20",
+            childIssues: []
+        },
+        {
+            key: "ISSUES-WITHOUT-EPICS",
+            summary: "Issues Without Epics",
+            issueType: "Epic",
+            statusName: "",
+            statusCategory: "new",
+            priority: "Low",
+            assignee: "",
+            fixVersions: "",
+            healthStatus: "none",
+            startDate: null,
+            endDate: null,
+            childIssues: [
+                {
+                    key: "PROJ-501",
+                    summary: "Update security policies document (Orphan Issue)",
+                    issueType: "Story",
+                    statusName: "In Progress",
+                    statusCategory: "indeterminate",
+                    priority: "High",
+                    assignee: "Sarah Jenkins",
+                    fixVersions: "2026.10.20",
+                    healthStatus: "red",
+                    startDate: "2026-07-05",
+                    endDate: "2026-07-15"
+                },
+                {
+                    key: "PROJ-502",
+                    summary: "General developer workspace setup (Orphan Issue)",
+                    issueType: "Story",
+                    statusName: "Done",
+                    statusCategory: "done",
+                    priority: "Low",
+                    assignee: "David Chen",
+                    fixVersions: "2026.09.00",
+                    healthStatus: "green",
+                    startDate: "2026-05-15",
+                    endDate: "2026-05-30"
                 }
             ]
         }

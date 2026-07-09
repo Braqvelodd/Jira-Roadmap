@@ -151,6 +151,9 @@ public class JiraController {
             "  \"issueType\": \"Epic\"," +
             "  \"statusName\": \"In Progress\"," +
             "  \"statusCategory\": \"indeterminate\"," +
+            "  \"priority\": \"High\"," +
+            "  \"assignee\": \"Sarah Jenkins\"," +
+            "  \"fixVersions\": \"2026.10.20\"," +
             "  \"healthStatus\": \"red\"," +
             "  \"startDate\": \"2026-06-01\"," +
             "  \"endDate\": \"2026-08-15\"," +
@@ -161,6 +164,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"Done\"," +
             "      \"statusCategory\": \"done\"," +
+            "      \"priority\": \"High\"," +
+            "      \"assignee\": \"Sarah Jenkins\"," +
+            "      \"fixVersions\": \"2026.10.20\"," +
             "      \"healthStatus\": \"green\"," +
             "      \"startDate\": \"2026-06-01\"," +
             "      \"endDate\": \"2026-06-15\"" +
@@ -171,6 +177,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"In Progress\"," +
             "      \"statusCategory\": \"indeterminate\"," +
+            "      \"priority\": \"Medium\"," +
+            "      \"assignee\": \"Alex River\"," +
+            "      \"fixVersions\": \"2026.10.20\"," +
             "      \"healthStatus\": \"yellow\"," +
             "      \"startDate\": \"2026-06-10\"," +
             "      \"endDate\": \"2026-07-05\"" +
@@ -181,6 +190,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"To Do\"," +
             "      \"statusCategory\": \"new\"," +
+            "      \"priority\": \"High\"," +
+            "      \"assignee\": \"Sarah Jenkins\"," +
+            "      \"fixVersions\": \"2026.10.20\"," +
             "      \"healthStatus\": \"red\"," +
             "      \"startDate\": \"2026-07-06\"," +
             "      \"endDate\": \"2026-08-15\"" +
@@ -193,6 +205,9 @@ public class JiraController {
             "  \"issueType\": \"Epic\"," +
             "  \"statusName\": \"In Progress\"," +
             "  \"statusCategory\": \"indeterminate\"," +
+            "  \"priority\": \"Medium\"," +
+            "  \"assignee\": \"Alex River\"," +
+            "  \"fixVersions\": \"2026.11.00\"," +
             "  \"healthStatus\": \"yellow\"," +
             "  \"startDate\": \"2026-06-15\"," +
             "  \"endDate\": \"2026-09-01\"," +
@@ -203,6 +218,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"Done\"," +
             "      \"statusCategory\": \"done\"," +
+            "      \"priority\": \"Medium\"," +
+            "      \"assignee\": \"David Chen\"," +
+            "      \"fixVersions\": \"2026.11.00\"," +
             "      \"healthStatus\": \"green\"," +
             "      \"startDate\": \"2026-06-15\"," +
             "      \"endDate\": \"2026-07-01\"" +
@@ -213,6 +231,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"Done\"," +
             "      \"statusCategory\": \"done\"," +
+            "      \"priority\": \"Low\"," +
+            "      \"assignee\": \"Alex River\"," +
+            "      \"fixVersions\": \"2026.11.00\"," +
             "      \"healthStatus\": \"green\"," +
             "      \"startDate\": \"2026-07-02\"," +
             "      \"endDate\": \"2026-07-07\"" +
@@ -223,6 +244,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"In Progress\"," +
             "      \"statusCategory\": \"indeterminate\"," +
+            "      \"priority\": \"Medium\"," +
+            "      \"assignee\": \"Alex River\"," +
+            "      \"fixVersions\": \"2026.11.00\"," +
             "      \"healthStatus\": \"none\"," +
             "      \"startDate\": \"2026-07-08\"," +
             "      \"endDate\": \"2026-07-28\"" +
@@ -233,6 +257,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"To Do\"," +
             "      \"statusCategory\": \"new\"," +
+            "      \"priority\": \"High\"," +
+            "      \"assignee\": \"David Chen\"," +
+            "      \"fixVersions\": \"2026.11.00\"," +
             "      \"healthStatus\": \"none\"," +
             "      \"startDate\": \"2026-08-01\"," +
             "      \"endDate\": \"2026-09-01\"" +
@@ -245,6 +272,9 @@ public class JiraController {
             "  \"issueType\": \"Epic\"," +
             "  \"statusName\": \"To Do\"," +
             "  \"statusCategory\": \"new\"," +
+            "  \"priority\": \"High\"," +
+            "  \"assignee\": \"Emma Watson\"," +
+            "  \"fixVersions\": \"2026.12.00\"," +
             "  \"healthStatus\": \"none\"," +
             "  \"startDate\": \"2026-08-20\"," +
             "  \"endDate\": \"2026-09-30\"," +
@@ -255,6 +285,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"To Do\"," +
             "      \"statusCategory\": \"new\"," +
+            "      \"priority\": \"High\"," +
+            "      \"assignee\": \"Emma Watson\"," +
+            "      \"fixVersions\": \"2026.12.00\"," +
             "      \"healthStatus\": \"none\"," +
             "      \"startDate\": null," +
             "      \"endDate\": null" +
@@ -267,6 +300,9 @@ public class JiraController {
             "  \"issueType\": \"Epic\"," +
             "  \"statusName\": \"To Do\"," +
             "  \"statusCategory\": \"new\"," +
+            "  \"priority\": \"Low\"," +
+            "  \"assignee\": \"Marcus Aurelius\"," +
+            "  \"fixVersions\": \"2026.10.20\"," +
             "  \"healthStatus\": \"green\"," +
             "  \"startDate\": \"2026-07-01\"," +
             "  \"endDate\": \"2026-07-20\"," +
@@ -278,6 +314,9 @@ public class JiraController {
             "  \"issueType\": \"Epic\"," +
             "  \"statusName\": \"\"," +
             "  \"statusCategory\": \"new\"," +
+            "  \"priority\": \"Low\"," +
+            "  \"assignee\": \"\"," +
+            "  \"fixVersions\": \"\"," +
             "  \"healthStatus\": \"none\"," +
             "  \"startDate\": null," +
             "  \"endDate\": null," +
@@ -288,6 +327,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"In Progress\"," +
             "      \"statusCategory\": \"indeterminate\"," +
+            "      \"priority\": \"High\"," +
+            "      \"assignee\": \"Sarah Jenkins\"," +
+            "      \"fixVersions\": \"2026.10.20\"," +
             "      \"healthStatus\": \"red\"," +
             "      \"startDate\": \"2026-07-05\"," +
             "      \"endDate\": \"2026-07-15\"" +
@@ -298,6 +340,9 @@ public class JiraController {
             "      \"issueType\": \"Story\"," +
             "      \"statusName\": \"Done\"," +
             "      \"statusCategory\": \"done\"," +
+            "      \"priority\": \"Low\"," +
+            "      \"assignee\": \"David Chen\"," +
+            "      \"fixVersions\": \"2026.09.00\"," +
             "      \"healthStatus\": \"green\"," +
             "      \"startDate\": \"2026-05-15\"," +
             "      \"endDate\": \"2026-05-30\"" +
