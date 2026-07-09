@@ -181,19 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Toggle Fields popover
-    const toggleFields = (e) => {
-        e.stopPropagation();
-        const popover = document.getElementById('fields-popover');
-        const isHidden = popover.style.display === 'none';
-        popover.style.display = isHidden ? 'flex' : 'none';
-        if (isHidden) {
-            const trigger = e.currentTarget;
-            const rect = trigger.getBoundingClientRect();
-            popover.style.top = `${rect.bottom + window.scrollY + 6}px`;
-            popover.style.left = `${rect.left + window.scrollX - 60}px`;
-        }
-    };
-
     document.getElementById('btn-fields').addEventListener('click', toggleFields);
 
     // Close popovers on click outside
@@ -254,6 +241,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bootstrap backend details
     bootstrapApp();
 });
+
+function toggleFields(e) {
+    if (e) e.stopPropagation();
+    const popover = document.getElementById('fields-popover');
+    const isHidden = popover.style.display === 'none';
+    popover.style.display = isHidden ? 'flex' : 'none';
+    if (isHidden && e) {
+        const trigger = e.currentTarget;
+        const rect = trigger.getBoundingClientRect();
+        popover.style.top = `${rect.bottom + window.scrollY + 6}px`;
+        popover.style.left = `${rect.left + window.scrollX - 60}px`;
+    }
+}
 
 function showLoader(text) {
     document.getElementById('loader-text').innerText = text || 'Loading...';
