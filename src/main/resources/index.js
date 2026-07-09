@@ -653,7 +653,7 @@ function renderHeadersRow() {
     
     // Sub-header 1: Epic / Issue search input
     const subEpic = document.createElement('div');
-    subEpic.className = 'header-cell cell-epic-issue';
+    subEpic.className = 'header-cell cell-epicIssue';
     subEpic.innerHTML = `
         <input type="text" class="col-filter-input" data-filter="epicIssue" placeholder="Search..." value="${state.filters.epicIssue || ''}">
         <div class="col-resizer" data-column="epicIssue"></div>
@@ -998,7 +998,7 @@ function createLeftRow(issue, isChild = false, extraClass = '', isCollapsed = fa
 
     // 1. Epic / Issue Column
     const summaryCell = document.createElement('div');
-    summaryCell.className = 'body-cell cell-epic-issue';
+    summaryCell.className = 'body-cell cell-epicIssue';
     const wEpic = state.columnWidths.epicIssue || 250;
     summaryCell.style.width = wEpic + 'px';
     summaryCell.style.minWidth = wEpic + 'px';

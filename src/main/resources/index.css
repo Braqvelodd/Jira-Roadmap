@@ -937,7 +937,7 @@ body {
 }
 
 /* Column Width Specifications */
-.cell-epic-issue {
+.cell-epicIssue {
     flex: 1;
     min-width: 250px;
     display: flex;
