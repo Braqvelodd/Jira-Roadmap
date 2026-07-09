@@ -346,11 +346,11 @@ body {
 }
 
 .issues-panel .panel-header {
-    height: 48px;
+    height: 56px;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--bg-header-row);
     display: flex;
-    align-items: stretch;
+    flex-direction: column;
     width: max-content;
     min-width: 100%;
     font-size: 11px;
@@ -380,7 +380,7 @@ body {
 }
 
 .timeline-header-scroll {
-    height: 48px;
+    height: 56px;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--bg-header-row);
     position: sticky;
@@ -401,7 +401,7 @@ body {
    ========================================================================== */
 .timeline-scale-row {
     display: flex;
-    height: 24px;
+    height: 28px;
     font-size: 11px;
     font-weight: 500;
     color: var(--text-secondary);
@@ -1053,4 +1053,86 @@ body {
     color: #36b37e;
     background-color: rgba(54, 179, 126, 0.15);
     border-color: rgba(54, 179, 126, 0.25);
+}
+
+/* Column Resizer Handle */
+.header-cell {
+    position: relative;
+}
+
+.col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 10;
+    user-select: none;
+    border-right: 2px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+
+.col-resizer:hover, .col-resizer.resizing {
+    border-right: 2px solid var(--primary-blue);
+}
+
+/* Double-row Header Structure */
+.header-group-row, .header-sub-row {
+    display: flex;
+    align-items: stretch;
+    height: 28px;
+    width: 100%;
+}
+
+.header-group-row {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-group-row .header-cell {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.8px;
+    justify-content: center;
+    border-bottom: none;
+}
+
+.header-sub-row .header-cell {
+    border-bottom: none;
+}
+
+.header-cell.group-fields {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+}
+
+/* Inline Fields Add Button */
+#btn-fields-inline {
+    background-color: var(--primary-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 9px;
+    font-weight: 600;
+    cursor: pointer;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    text-transform: none; /* keep original capitalization */
+    transition: background-color var(--transition-fast);
+}
+
+#btn-fields-inline:hover {
+    background-color: var(--primary-blue-hover);
+}
+
+body.resizing-active {
+    cursor: col-resize !important;
+    user-select: none !important;
 }

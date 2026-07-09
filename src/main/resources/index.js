@@ -27,7 +27,17 @@ let state = {
     timelineStart: new Date(),
     timelineEnd: new Date(),
     activeStatusIssueId: null,
-    visibleColumns: ['statusName', 'fixVersions', 'healthStatus'], // Default visible columns
+    visibleColumns: ['statusName', 'fixVersions'], // Optional fields (Health is permanent now!)
+    columnWidths: {
+        epicIssue: 250,
+        healthStatus: 110,
+        statusName: 100,
+        priority: 85,
+        assignee: 120,
+        fixVersions: 110,
+        startDate: 95,
+        endDate: 95
+    },
     filters: {
         epicIssue: '',
         statusName: '',
@@ -48,6 +58,92 @@ const epicColors = [
     'var(--epic-bar-4)',
     'var(--epic-bar-5)'
 ];
+
+function updateHeaderGroupWidths() {
+    // Group Epic/Issue
+    const gEpic = document.querySelector('.group-epic-issue');
+    if (gEpic) {
+        gEpic.style.width = state.columnWidths.epicIssue + 'px';
+        gEpic.style.minWidth = state.columnWidths.epicIssue + 'px';
+        gEpic.style.maxWidth = state.columnWidths.epicIssue + 'px';
+    }
+    // Group Health
+    const gHealth = document.querySelector('.group-healthStatus');
+    if (gHealth) {
+        gHealth.style.width = state.columnWidths.healthStatus + 'px';
+        gHealth.style.minWidth = state.columnWidths.healthStatus + 'px';
+        gHealth.style.maxWidth = state.columnWidths.healthStatus + 'px';
+    }
+    // Group Fields (sum of all visible fields)
+    const gFields = document.querySelector('.group-fields');
+    if (gFields) {
+        let totalWidth = 0;
+        state.visibleColumns.forEach(col => {
+            totalWidth += state.columnWidths[col] || 100;
+        });
+        gFields.style.width = totalWidth + 'px';
+        gFields.style.minWidth = totalWidth + 'px';
+        gFields.style.maxWidth = totalWidth + 'px';
+        
+        // Hide the fields group header if no fields are visible!
+        gFields.style.display = totalWidth > 0 ? 'flex' : 'none';
+    }
+}
+
+function initColumnResizing() {
+    let startX = 0;
+    let startWidth = 0;
+    let activeCol = null;
+    let affectedCells = [];
+
+    document.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('col-resizer')) {
+            activeCol = e.target.dataset.column;
+            startX = e.clientX;
+            startWidth = state.columnWidths[activeCol] || 100;
+            
+            // Get all cells in this column to resize them live
+            affectedCells = Array.from(document.querySelectorAll(`.cell-${activeCol}`));
+            
+            document.body.classList.add('resizing-active');
+            e.target.classList.add('resizing');
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            e.preventDefault();
+        }
+    });
+
+    function handleMouseMove(e) {
+        if (!activeCol) return;
+        const deltaX = e.clientX - startX;
+        let newWidth = Math.max(50, startWidth + deltaX); // Min width 50px
+        
+        // Update state
+        state.columnWidths[activeCol] = newWidth;
+        
+        // Resize affected cells live
+        affectedCells.forEach(cell => {
+            cell.style.width = newWidth + 'px';
+            cell.style.minWidth = newWidth + 'px';
+            cell.style.maxWidth = newWidth + 'px';
+        });
+        
+        updateHeaderGroupWidths();
+    }
+
+    function handleMouseUp() {
+        document.body.classList.remove('resizing-active');
+        const activeResizer = document.querySelector('.col-resizer.resizing');
+        if (activeResizer) {
+            activeResizer.classList.remove('resizing');
+        }
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        activeCol = null;
+        affectedCells = [];
+    }
+}
 
 // ==========================================================================
 // Initialization & Listeners
@@ -85,11 +181,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Toggle Fields popover
-    document.getElementById('btn-fields').addEventListener('click', (e) => {
+    const toggleFields = (e) => {
         e.stopPropagation();
         const popover = document.getElementById('fields-popover');
-        popover.style.display = popover.style.display === 'none' ? 'flex' : 'none';
-    });
+        const isHidden = popover.style.display === 'none';
+        popover.style.display = isHidden ? 'flex' : 'none';
+        if (isHidden) {
+            const trigger = e.currentTarget;
+            const rect = trigger.getBoundingClientRect();
+            popover.style.top = `${rect.bottom + window.scrollY + 6}px`;
+            popover.style.left = `${rect.left + window.scrollX - 60}px`;
+        }
+    };
+
+    document.getElementById('btn-fields').addEventListener('click', toggleFields);
 
     // Close popovers on click outside
     document.addEventListener('click', (e) => {
@@ -100,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const fieldsPopover = document.getElementById('fields-popover');
-        if (!e.target.closest('#btn-fields') && !e.target.closest('.fields-popover')) {
+        if (!e.target.closest('#btn-fields') && !e.target.closest('#btn-fields-inline') && !e.target.closest('.fields-popover')) {
             fieldsPopover.style.display = 'none';
         }
     });
@@ -142,6 +247,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Keep left panel scroll position aligned with the right panel vertical scroll
         issuesContainer.scrollTop = timelinePanel.scrollTop;
     });
+
+    // Initialize live column resizing drag handlers
+    initColumnResizing();
 
     // Bootstrap backend details
     bootstrapApp();
@@ -382,24 +490,67 @@ function renderHeadersRow() {
     const headerContainer = document.getElementById('issues-panel-header');
     headerContainer.innerHTML = '';
     
-    // Always add Epic/Issue column
-    const epicHeader = document.createElement('div');
-    epicHeader.className = 'header-cell cell-epic-issue';
-    epicHeader.innerHTML = `
-        <div class="header-cell-title">Epic / Issue</div>
-        <input type="text" class="col-filter-input" data-filter="epicIssue" placeholder="Search..." value="${state.filters.epicIssue || ''}">
-    `;
-    headerContainer.appendChild(epicHeader);
+    // Create Row 1: Group Headers
+    const groupRow = document.createElement('div');
+    groupRow.className = 'header-group-row';
     
-    // Add other toggled columns
+    // Group 1: Epic / Issue
+    const gEpic = document.createElement('div');
+    gEpic.className = 'header-cell group-epic-issue';
+    gEpic.innerText = 'Epic / Issue';
+    groupRow.appendChild(gEpic);
+    
+    // Group 2: Health Status
+    const gHealth = document.createElement('div');
+    gHealth.className = 'header-cell group-healthStatus';
+    gHealth.innerText = 'Health Status';
+    groupRow.appendChild(gHealth);
+    
+    // Group 3: Grouped Fields (Status, Priority, Assignee, Fix Version, Dates, etc.)
+    const gFields = document.createElement('div');
+    gFields.className = 'header-cell group-fields';
+    gFields.innerHTML = `
+        <span>Fields</span>
+        <button id="btn-fields-inline" title="Toggle Visible Columns/Fields">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>Add Field</span>
+        </button>
+    `;
+    groupRow.appendChild(gFields);
+    headerContainer.appendChild(groupRow);
+    
+    // Create Row 2: Sub-headers (Filter row)
+    const subRow = document.createElement('div');
+    subRow.className = 'header-sub-row';
+    
+    // Sub-header 1: Epic / Issue search input
+    const subEpic = document.createElement('div');
+    subEpic.className = 'header-cell cell-epic-issue';
+    subEpic.innerHTML = `
+        <input type="text" class="col-filter-input" data-filter="epicIssue" placeholder="Search..." value="${state.filters.epicIssue || ''}">
+        <div class="col-resizer" data-column="epicIssue"></div>
+    `;
+    subRow.appendChild(subEpic);
+    
+    // Sub-header 2: Health Status filter dropdown
+    const subHealth = document.createElement('div');
+    subHealth.className = 'header-cell cell-healthStatus';
+    subHealth.innerHTML = `
+        <input type="text" class="col-filter-input" data-filter="healthStatus" placeholder="Filter..." value="${state.filters.healthStatus || ''}">
+        <div class="col-resizer" data-column="healthStatus"></div>
+    `;
+    subRow.appendChild(subHealth);
+    
+    // Sub-headers 3+: Grouped Fields
     const columnMeta = {
         statusName: 'Status',
         priority: 'Priority',
         assignee: 'Assignee',
         fixVersions: 'Fix Version',
         startDate: 'Start Date',
-        endDate: 'Due Date',
-        healthStatus: 'Health'
+        endDate: 'Due Date'
     };
     
     state.visibleColumns.forEach(col => {
@@ -407,14 +558,53 @@ function renderHeadersRow() {
         const colHeader = document.createElement('div');
         colHeader.className = `header-cell cell-${col}`;
         colHeader.innerHTML = `
-            <div class="header-cell-title">${label}</div>
-            <input type="text" class="col-filter-input" data-filter="${col}" placeholder="Filter..." value="${state.filters[col] || ''}">
+            <input type="text" class="col-filter-input" data-filter="${col}" placeholder="${label}..." value="${state.filters[col] || ''}">
+            <div class="col-resizer" data-column="${col}"></div>
         `;
-        headerContainer.appendChild(colHeader);
+        subRow.appendChild(colHeader);
+    });
+    headerContainer.appendChild(subRow);
+    
+    // Apply styling widths to all header cells
+    gEpic.style.width = state.columnWidths.epicIssue + 'px';
+    gEpic.style.minWidth = state.columnWidths.epicIssue + 'px';
+    gEpic.style.maxWidth = state.columnWidths.epicIssue + 'px';
+    subEpic.style.width = state.columnWidths.epicIssue + 'px';
+    subEpic.style.minWidth = state.columnWidths.epicIssue + 'px';
+    subEpic.style.maxWidth = state.columnWidths.epicIssue + 'px';
+    
+    gHealth.style.width = state.columnWidths.healthStatus + 'px';
+    gHealth.style.minWidth = state.columnWidths.healthStatus + 'px';
+    gHealth.style.maxWidth = state.columnWidths.healthStatus + 'px';
+    subHealth.style.width = state.columnWidths.healthStatus + 'px';
+    subHealth.style.minWidth = state.columnWidths.healthStatus + 'px';
+    subHealth.style.maxWidth = state.columnWidths.healthStatus + 'px';
+    
+    let totalFieldsWidth = 0;
+    state.visibleColumns.forEach(col => {
+        const width = state.columnWidths[col] || 100;
+        totalFieldsWidth += width;
+        const subCol = subRow.querySelector(`.cell-${col}`);
+        if (subCol) {
+            subCol.style.width = width + 'px';
+            subCol.style.minWidth = width + 'px';
+            subCol.style.maxWidth = width + 'px';
+        }
     });
     
+    gFields.style.width = totalFieldsWidth + 'px';
+    gFields.style.minWidth = totalFieldsWidth + 'px';
+    gFields.style.maxWidth = totalFieldsWidth + 'px';
+    gFields.style.display = totalFieldsWidth > 0 ? 'flex' : 'none';
+    
+    // Bind click listener for inline "+ Add Field" button
+    const inlineAddBtn = gFields.querySelector('#btn-fields-inline');
+    if (inlineAddBtn) {
+        inlineAddBtn.addEventListener('click', toggleFields);
+    }
+    
     // Bind filter input listeners
-    headerContainer.querySelectorAll('.col-filter-input').forEach(input => {
+    subRow.querySelectorAll('.col-filter-input').forEach(input => {
         input.addEventListener('input', (e) => {
             const filterType = e.currentTarget.dataset.filter;
             state.filters[filterType] = e.currentTarget.value.trim().toLowerCase();
@@ -669,9 +859,13 @@ function createLeftRow(issue, isChild = false, extraClass = '', isCollapsed = fa
     row.className = `row-item issue-row ${extraClass}`;
     row.dataset.key = issue.key;
 
-    // 1. Summary Column
+    // 1. Epic / Issue Column
     const summaryCell = document.createElement('div');
     summaryCell.className = 'body-cell cell-epic-issue';
+    const wEpic = state.columnWidths.epicIssue || 250;
+    summaryCell.style.width = wEpic + 'px';
+    summaryCell.style.minWidth = wEpic + 'px';
+    summaryCell.style.maxWidth = wEpic + 'px';
 
     const info = document.createElement('div');
     info.className = 'issue-info';
@@ -734,10 +928,46 @@ function createLeftRow(issue, isChild = false, extraClass = '', isCollapsed = fa
     summaryCell.appendChild(info);
     row.appendChild(summaryCell);
 
-    // 2. Extra Columns Cells
+    // 2. Health Status Column (Always rendered as the 2nd column)
+    const healthCell = document.createElement('div');
+    healthCell.className = 'body-cell cell-healthStatus';
+    const wHealth = state.columnWidths.healthStatus || 110;
+    healthCell.style.width = wHealth + 'px';
+    healthCell.style.minWidth = wHealth + 'px';
+    healthCell.style.maxWidth = wHealth + 'px';
+
+    if (issue.key !== 'ISSUES-WITHOUT-EPICS') {
+        const health = document.createElement('div');
+        const badgeStatus = issue.healthStatus || 'none';
+        health.className = `health-badge ${badgeStatus}`;
+        
+        let labelText = 'No problems';
+        if (badgeStatus === 'yellow') labelText = 'Minor problems';
+        else if (badgeStatus === 'red') labelText = 'Severe limitations';
+        else if (badgeStatus === 'none') labelText = 'Set status';
+
+        health.innerHTML = `
+            <span class="badge-dot"></span>
+            <span>${labelText}</span>
+        `;
+        
+        // Show status update popover
+        health.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showStatusPopover(e, issue.key);
+        });
+        healthCell.appendChild(health);
+    }
+    row.appendChild(healthCell);
+
+    // 3. Other Grouped Columns Cells
     state.visibleColumns.forEach(col => {
         const cell = document.createElement('div');
         cell.className = `body-cell cell-${col}`;
+        const wCol = state.columnWidths[col] || 100;
+        cell.style.width = wCol + 'px';
+        cell.style.minWidth = wCol + 'px';
+        cell.style.maxWidth = wCol + 'px';
 
         if (issue.key === 'ISSUES-WITHOUT-EPICS') {
             row.appendChild(cell);
@@ -753,27 +983,6 @@ function createLeftRow(issue, isChild = false, extraClass = '', isCollapsed = fa
             statusSpan.className = `status-badge ${catClass}`;
             statusSpan.innerText = issue.statusName || '';
             cell.appendChild(statusSpan);
-        } else if (col === 'healthStatus') {
-            const health = document.createElement('div');
-            const badgeStatus = issue.healthStatus || 'none';
-            health.className = `health-badge ${badgeStatus}`;
-            
-            let labelText = 'No problems';
-            if (badgeStatus === 'yellow') labelText = 'Minor problems';
-            else if (badgeStatus === 'red') labelText = 'Severe limitations';
-            else if (badgeStatus === 'none') labelText = 'Set status';
-
-            health.innerHTML = `
-                <span class="badge-dot"></span>
-                <span>${labelText}</span>
-            `;
-            
-            // Show status update popover
-            health.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showStatusPopover(e, issue.key);
-            });
-            cell.appendChild(health);
         } else {
             cell.innerText = issue[col] || '';
         }
