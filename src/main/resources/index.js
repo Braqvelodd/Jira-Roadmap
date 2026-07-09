@@ -1,3 +1,20 @@
+// Safe localStorage helper to prevent DOM Exception 18 security crashes in JavaFX WebView
+function safeGetLocalStorage(key, defaultValue) {
+    try {
+        return localStorage.getItem(key) || defaultValue;
+    } catch (e) {
+        return defaultValue;
+    }
+}
+
+function safeSetLocalStorage(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch (e) {
+        // Fallback silently if sandboxed
+    }
+}
+
 // ==========================================================================
 // State Management
 // ==========================================================================
@@ -26,7 +43,7 @@ const epicColors = [
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     // Check local storage for theme preference
-    const savedTheme = localStorage.getItem('jira-roadmap-theme') || 'light';
+    const savedTheme = safeGetLocalStorage('jira-roadmap-theme', 'light');
     setTheme(savedTheme);
 
     // Bind UI controls
@@ -723,7 +740,7 @@ function setTheme(theme) {
         sunIcon.style.display = 'block';
         moonIcon.style.display = 'none';
     }
-    localStorage.setItem('jira-roadmap-theme', theme);
+    safeSetLocalStorage('jira-roadmap-theme', theme);
 }
 
 function toggleTheme() {

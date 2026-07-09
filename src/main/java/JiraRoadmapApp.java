@@ -43,6 +43,13 @@ public class JiraRoadmapApp extends Application {
             // 6. Setup WebView & WebView Bridge
             WebView webView = new WebView();
             WebEngine webEngine = webView.getEngine();
+            
+            // Set user data directory to enable LocalStorage support safely
+            java.io.File cacheDir = new java.io.File(System.getProperty("user.home"), ".jiraroadmap" + java.io.File.separator + "cache");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+            webEngine.setUserDataDirectory(cacheDir);
 
             // 5. Initialize Controller
             jiraController = new JiraController(jiraClient, configManager, webEngine);
